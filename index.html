@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agents of S.T.R.I.P.E.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+html{background:#0a0a0a}
+:root{--black:#0a0a0a;--dark:#0f0f0f;--green:#00ff88;--green-dim:#00cc6a;--green-glow:rgba(0,255,136,.15);--amber:#ffaa00;--red:#ff3344;--cyan:#00e5ff;--magenta:#ff00ff;--white:#d8d8d8;--grey:#555;--grey-light:#888}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--black);color:var(--white);font-family:'JetBrains Mono',monospace;height:100vh;overflow:hidden;position:relative}
+
+/* Scan lines */
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,136,.012) 2px,rgba(0,255,136,.012) 4px);pointer-events:none;z-index:1000}
+
+/* ═══ PAGE SYSTEM ═══ */
+.page{position:fixed;top:0;left:0;width:100%;height:100%;display:none;z-index:1}
+.page.active{display:flex}
+
+/* ═══ GLITCH TRANSITION OVERLAY ═══ */
+.page-transition{position:fixed;top:0;left:0;right:0;bottom:0;z-index:900;display:none;pointer-events:none}
+.page-transition.active{display:block}
+.page-transition .tear{position:absolute;left:0;right:0;background:var(--black);height:0}
+.page-transition .flash-band{position:absolute;left:0;right:0;height:4px;opacity:0}
+.page-transition .code-frag{position:absolute;font-family:'JetBrains Mono',monospace;font-size:9px;opacity:0;white-space:nowrap}
+
+/* ═══════════════════════════════════ */
+/* PAGE 1 — ENTRY                      */
+/* ═══════════════════════════════════ */
+#page1{align-items:center;justify-content:center}
+.grid-bg{position:fixed;top:0;left:0;right:0;bottom:0;background-image:linear-gradient(rgba(0,255,136,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,136,.025) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;opacity:0;transition:opacity 2s ease}
+.grid-bg.visible{opacity:1}
+#globeCanvas1{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;opacity:0;transition:opacity 3s ease;z-index:2}
+#globeCanvas1.visible{opacity:1}
+
+/* Flash overlays */
+.p1-flash{position:fixed;top:0;left:0;right:0;bottom:0;opacity:0;pointer-events:none;z-index:500}
+.p1-flash-green{background:var(--green)}.p1-flash-green.flash{animation:fG .4s ease}
+@keyframes fG{0%{opacity:0}8%{opacity:.15}16%{opacity:0}24%{opacity:.08}100%{opacity:0}}
+.p1-flash-white{background:#fff}.p1-flash-white.flash{animation:fW .2s ease}
+@keyframes fW{0%{opacity:0}12%{opacity:1}25%{opacity:0}35%{opacity:.5}100%{opacity:0}}
+.p1-flash-red{background:var(--red)}.p1-flash-red.flash{animation:fR .15s ease}
+@keyframes fR{0%{opacity:0}30%{opacity:.25}100%{opacity:0}}
+.p1-flash-cyan{background:var(--cyan)}.p1-flash-cyan.flash{animation:fC .12s ease}
+@keyframes fC{0%{opacity:0}40%{opacity:.15}100%{opacity:0}}
+.p1-flash-magenta{background:var(--magenta)}.p1-flash-magenta.flash{animation:fM .1s ease}
+@keyframes fM{0%{opacity:0}30%{opacity:.12}100%{opacity:0}}
+
+.p1-screen-tear{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:400;opacity:0}
+.p1-screen-tear.active{animation:tear .35s steps(1) 3}
+@keyframes tear{0%{opacity:0}8%{opacity:1;background:linear-gradient(0deg,transparent 35%,var(--black) 35%,var(--black) 39%,transparent 39%);transform:translateX(10px)}16%{opacity:0;transform:translateX(0)}25%{opacity:1;background:linear-gradient(0deg,transparent 58%,var(--black) 58%,var(--black) 63%,transparent 63%);transform:translateX(-15px)}33%{opacity:0;transform:translateX(0)}50%{opacity:0}100%{opacity:0}}
+.p1-code-rain{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:380;display:none;overflow:hidden}
+.p1-code-rain.active{display:block}
+.p1-code-rain .frag{position:absolute;font-family:'JetBrains Mono',monospace;white-space:nowrap;animation:codeFade .6s ease forwards}
+@keyframes codeFade{0%{opacity:.9;transform:translateY(0)}100%{opacity:0;transform:translateY(10px)}}
+.p1-coord-flash{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:450;display:none;overflow:hidden}
+.p1-coord-flash.active{display:block}
+.p1-coord-flash span{position:absolute;white-space:nowrap;font-family:'JetBrains Mono',monospace;animation:coordFade .4s ease forwards}
+@keyframes coordFade{0%{opacity:.8}100%{opacity:0}}
+.p1-phrase-flicker{font-family:'JetBrains Mono',monospace;font-size:42px;font-weight:700;color:var(--green);position:absolute;z-index:300;opacity:0;text-transform:uppercase;letter-spacing:4px;text-shadow:0 0 30px var(--green-glow);pointer-events:none}
+.p1-rgb-split{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:390;opacity:0;mix-blend-mode:screen}
+.p1-rgb-split.active{animation:rgbS .4s steps(1) 2}
+@keyframes rgbS{0%{opacity:0}10%{opacity:1;background:linear-gradient(90deg,rgba(255,0,0,.08),transparent 33%,rgba(0,255,0,.08) 33%,transparent 66%,rgba(0,0,255,.08) 66%,transparent);transform:translateX(-3px)}20%{transform:translateX(5px)}30%{opacity:0;transform:translateX(0)}50%{opacity:1;background:linear-gradient(90deg,rgba(0,255,255,.1),transparent 50%,rgba(255,0,255,.1) 50%,transparent);transform:translateX(-8px) skewX(-2deg)}65%{transform:translateX(4px) skewX(1deg)}75%{opacity:0}100%{opacity:0}}
+
+.p1-container{text-align:center;position:relative;z-index:10}
+.stripe-logo{font-family:'Outfit',sans-serif;font-size:76px;font-weight:700;color:#fff;letter-spacing:-2px;position:relative;display:inline-block;opacity:0}
+.stripe-logo.visible{opacity:1}
+.stripe-logo .matrix-char{display:inline-block;position:relative;color:var(--green);transition:color .15s ease}
+.stripe-logo .matrix-char.settled{color:#fff;transition:color .3s ease}
+
+.stripe-logo.g1{animation:g1 .1s steps(1) 2}@keyframes g1{0%{transform:translate(0)}25%{transform:translate(-2px,1px);opacity:.8}50%{transform:translate(2px,-1px)}75%{transform:translate(0);opacity:1}100%{transform:translate(0)}}
+.stripe-logo.g2{animation:g2 .12s steps(1) 3}@keyframes g2{0%{transform:translate(0);filter:none}20%{transform:translate(-4px,2px);filter:hue-rotate(90deg)}40%{transform:translate(5px,-3px);filter:hue-rotate(180deg)}60%{transform:translate(-3px,-2px);filter:none}80%{transform:translate(3px,2px);filter:hue-rotate(270deg)}100%{transform:translate(0);filter:none}}
+.stripe-logo.g3{animation:g3 .08s steps(1) infinite}@keyframes g3{0%{transform:translate(0) skewX(0)}12%{transform:translate(-4px,3px) skewX(-3deg)}25%{transform:translate(5px,-3px) skewX(4deg)}37%{transform:translate(-3px,-3px) skewX(-2deg)}50%{transform:translate(4px,2px) skewX(3deg)}62%{transform:translate(-5px,2px) skewX(-4deg)}75%{transform:translate(3px,-2px) skewX(2deg)}87%{transform:translate(-2px,3px) skewX(-3deg)}100%{transform:translate(0) skewX(0)}}
+.stripe-logo.g4{animation:g4 .06s steps(1) infinite}@keyframes g4{0%{transform:translate(0) skewX(0)}10%{transform:translate(-8px,5px) skewX(-8deg)}20%{transform:translate(10px,-4px) skewX(10deg)}30%{transform:translate(-6px,-6px) skewX(-5deg)}40%{transform:translate(8px,4px) skewX(8deg)}50%{transform:translate(-10px,6px) skewX(-10deg)}60%{transform:translate(6px,-8px) skewX(6deg)}70%{transform:translate(-4px,4px) skewX(-4deg)}80%{transform:translate(8px,-6px) skewX(8deg)}90%{transform:translate(-6px,6px) skewX(-6deg)}100%{transform:translate(0) skewX(0)}}
+.stripe-logo.g4::before,.stripe-logo.g4::after{content:'stripe';position:absolute;top:0;left:0;width:100%;height:100%;font-family:'Outfit',sans-serif;font-size:76px;font-weight:700;letter-spacing:-2px}
+.stripe-logo.g4::before{color:var(--cyan);animation:gL1b .06s steps(1) infinite;clip-path:polygon(0 0,100% 0,100% 35%,0 35%)}
+.stripe-logo.g4::after{color:var(--red);animation:gL2b .06s steps(1) infinite;clip-path:polygon(0 65%,100% 65%,100% 100%,0 100%)}
+@keyframes gL1b{0%{transform:translate(0)}20%{transform:translate(8px,-4px)}40%{transform:translate(-10px,3px)}60%{transform:translate(6px,5px)}80%{transform:translate(-8px,-4px)}100%{transform:translate(0)}}
+@keyframes gL2b{0%{transform:translate(0)}20%{transform:translate(-6px,5px)}40%{transform:translate(10px,-6px)}60%{transform:translate(-8px,-3px)}80%{transform:translate(12px,4px)}100%{transform:translate(0)}}
+
+.stripe-logo.g-chaos{animation:gChaos .05s steps(1) infinite}
+.stripe-logo.g-chaos::before,.stripe-logo.g-chaos::after{content:'stripe';position:absolute;top:0;left:0;width:100%;height:100%;font-family:'Outfit',sans-serif;font-size:76px;font-weight:700;letter-spacing:-2px}
+.stripe-logo.g-chaos::before{color:var(--cyan);animation:gCL1 .05s steps(1) infinite;clip-path:polygon(0 0,100% 0,100% 35%,0 35%)}
+.stripe-logo.g-chaos::after{color:var(--red);animation:gCL2 .05s steps(1) infinite;clip-path:polygon(0 65%,100% 65%,100% 100%,0 100%)}
+@keyframes gChaos{0%{transform:translate(0) skewX(0)}8%{transform:translate(-14px,8px) skewX(-14deg)}16%{transform:translate(16px,-7px) skewX(16deg)}24%{transform:translate(-12px,-10px) skewX(-10deg)}32%{transform:translate(18px,6px) skewX(12deg)}40%{transform:translate(-16px,9px) skewX(-18deg)}48%{transform:translate(12px,-14px) skewX(14deg)}56%{transform:translate(-10px,7px) skewX(-8deg)}64%{transform:translate(14px,-9px) skewX(10deg)}72%{transform:translate(-18px,12px) skewX(-16deg)}80%{transform:translate(10px,-6px) skewX(12deg)}88%{transform:translate(-12px,10px) skewX(-12deg)}100%{transform:translate(0) skewX(0)}}
+@keyframes gCL1{0%{transform:translate(0)}15%{transform:translate(12px,-6px)}30%{transform:translate(-16px,5px)}45%{transform:translate(10px,8px)}60%{transform:translate(-14px,-7px)}75%{transform:translate(18px,4px)}100%{transform:translate(0)}}
+@keyframes gCL2{0%{transform:translate(0)}15%{transform:translate(-10px,7px)}30%{transform:translate(14px,-8px)}45%{transform:translate(-12px,-5px)}60%{transform:translate(16px,6px)}75%{transform:translate(-14px,9px)}100%{transform:translate(0)}}
+
+/* Win97 popup */
+.win-overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:600;display:none;align-items:center;justify-content:center}
+.win-overlay.visible{display:flex}
+.win-popup{background:#c0c0c0;border:2px solid #fff;border-right-color:#404040;border-bottom-color:#404040;box-shadow:2px 2px 0 #000,inset 1px 1px 0 #dfdfdf;width:420px;max-width:90vw;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;user-select:none;animation:popIn .15s ease}
+@keyframes popIn{0%{transform:scale(.9);opacity:0}100%{transform:scale(1);opacity:1}}
+.win-titlebar{background:linear-gradient(90deg,#000080,#1084d0);color:#fff;font-size:12px;font-weight:700;padding:3px 6px;display:flex;align-items:center;justify-content:space-between}
+.win-titlebar .title-text{display:flex;align-items:center;gap:6px}
+.win-titlebar .title-icon{width:14px;height:14px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:#fff}
+.win-close{background:#c0c0c0;border:2px solid #fff;border-right-color:#404040;border-bottom-color:#404040;width:18px;height:18px;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#000;line-height:1;padding:0}
+.win-close:active{border-color:#404040;border-right-color:#fff;border-bottom-color:#fff}
+.win-body{padding:20px 24px;display:flex;gap:16px;align-items:flex-start}
+.win-icon{flex-shrink:0;width:40px;height:40px}
+.win-icon .tri{width:0;height:0;border-left:20px solid transparent;border-right:20px solid transparent;border-bottom:36px solid #ffcc00;position:relative}
+.win-icon .tri::after{content:'!';position:absolute;top:10px;left:50%;transform:translateX(-50%);font-size:20px;font-weight:900;color:#000;line-height:1}
+.win-text{flex:1}.win-text .alert-title{font-size:13px;font-weight:700;color:#000;margin-bottom:10px}
+.win-text .alert-msg{font-size:11px;color:#222;line-height:1.5;margin-bottom:6px}
+.win-text .alert-code{font-family:'JetBrains Mono',monospace;font-size:10px;color:#660000;background:#e8e8e8;padding:6px 8px;border:1px solid #aaa;margin-top:8px;display:inline-block}
+.win-footer{padding:10px 24px 16px;display:flex;justify-content:center;gap:12px}
+.win-btn{background:#c0c0c0;border:2px solid #fff;border-right-color:#404040;border-bottom-color:#404040;padding:6px 20px;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;font-size:11px;font-weight:600;color:#000;cursor:pointer;min-width:140px;text-align:center}
+.win-btn:active{border-color:#404040;border-right-color:#fff;border-bottom-color:#fff}
+.win-btn.primary{outline:1px dotted #000;outline-offset:-4px}
+
+/* Revealed logo */
+.p1-logo-block{display:none;flex-direction:column;align-items:center}
+.p1-logo-block.visible{display:flex}
+.agents-of{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:300;letter-spacing:14px;text-transform:uppercase;color:var(--green-dim);margin-bottom:10px;margin-left:14px;height:16px;overflow:hidden;opacity:.6}
+.agents-of .ch{display:inline-block;opacity:0}.agents-of .ch.on{opacity:.6}
+.stripe-revealed{font-family:'JetBrains Mono',monospace;font-size:44px;font-weight:700;color:var(--green);letter-spacing:10px;text-shadow:0 0 20px var(--green-glow),0 0 60px rgba(0,255,136,.1),0 0 120px rgba(0,255,136,.05);opacity:0}
+.stripe-revealed.vis{animation:revL .8s ease forwards}
+.origins-sub{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:300;letter-spacing:14px;text-transform:uppercase;color:var(--green-dim);margin-top:16px;margin-left:14px;opacity:0}
+.origins-sub.vis{animation:fadeIn 1s ease forwards}
+.standby-msg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:500;color:var(--green);letter-spacing:4px;text-transform:uppercase;opacity:0;text-shadow:0 0 20px var(--green-glow),0 0 40px rgba(0,255,136,.2);z-index:550;text-align:center;pointer-events:none;white-space:nowrap}
+.standby-msg.vis{animation:standbyIn 1.8s ease forwards}
+@keyframes standbyIn{0%{opacity:0;transform:translate(-50%,-50%) scale(1.1);filter:blur(4px)}15%{opacity:1;filter:blur(0)}25%{opacity:.3}35%{opacity:1}55%{opacity:1;transform:translate(-50%,-50%) scale(1)}85%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(.98)}}
+.standby-msg .dots{display:inline-block;width:30px;text-align:left}
+.standby-msg .dots::after{content:'';animation:dots 1s steps(4) infinite}
+@keyframes dots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}100%{content:''}}
+@keyframes revL{0%{opacity:0;transform:scale(1.05);letter-spacing:20px;filter:blur(3px)}40%{filter:blur(0)}100%{opacity:1;transform:scale(1);letter-spacing:10px}}
+
+.p1-divider{width:0;height:1px;background:linear-gradient(90deg,transparent,var(--green-dim),transparent);margin:40px auto;opacity:0}
+.p1-divider.vis{animation:expL 1.2s ease .6s forwards}@keyframes expL{0%{width:0;opacity:0}100%{width:180px;opacity:.35}}
+.p1-prompt{font-size:11px;font-weight:400;color:var(--green-dim);opacity:0;letter-spacing:2.5px;text-transform:uppercase}.p1-prompt.vis{opacity:1}
+.p1-prompt .cursor{display:inline-block;width:7px;height:13px;background:var(--green);margin-left:2px;vertical-align:middle;animation:blink 1s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+.p1-cta{margin-top:48px;opacity:0;display:none}.p1-cta.vis{display:block;animation:fadeIn 1s ease forwards}
+@keyframes fadeIn{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
+.p1-cta a{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;letter-spacing:6px;text-transform:uppercase;color:var(--green);text-decoration:none;padding:14px 40px;border:1px solid rgba(0,255,136,.2);transition:all .4s ease;cursor:pointer;display:inline-block;background:transparent}
+.p1-cta a:hover{background:rgba(0,255,136,.04);border-color:var(--green);box-shadow:0 0 40px rgba(0,255,136,.08);letter-spacing:8px}
+
+.p1-classification{position:fixed;top:28px;left:36px;font-size:9px;font-weight:400;letter-spacing:3px;text-transform:uppercase;color:var(--green-dim);opacity:0;display:none;z-index:10}
+.p1-classification.vis{display:block;animation:fadeInM 1.5s ease forwards}
+.p1-classification .dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--green);margin-right:8px;vertical-align:middle;animation:pulseDot 2s ease infinite}
+@keyframes pulseDot{0%,100%{opacity:.4}50%{opacity:1;box-shadow:0 0 6px var(--green)}}
+.p1-status-bar{position:fixed;bottom:28px;left:36px;right:36px;display:none;justify-content:space-between;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--grey);opacity:0;z-index:10}
+.p1-status-bar.vis{display:flex;animation:fadeInM 1.5s ease .3s forwards}
+@keyframes fadeInM{0%{opacity:0}100%{opacity:.45}}
+.p1-status-bar .s-green{color:var(--green-dim)}.p1-status-bar .s-amber{color:var(--amber)}
+
+/* ═══════════════════════════════════ */
+/* PAGE 2 — DOSSIER                    */
+/* ═══════════════════════════════════ */
+#page2{flex-direction:row}
+#page2 .left-panel{width:35%;height:100%;background:var(--dark);border-right:1px solid rgba(0,255,136,.06);display:flex;flex-direction:column}
+#page2 .left-header{padding:20px 24px 16px;border-bottom:1px solid rgba(0,255,136,.06);flex-shrink:0}
+#page2 .left-header .logo{font-size:9px;font-weight:700;letter-spacing:4px;color:var(--green-dim);opacity:.6;margin-bottom:12px}
+#page2 .file-tabs{display:flex;flex-direction:column;gap:2px}
+#page2 .file-tab{font-size:9px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;color:var(--grey);padding:10px 16px;cursor:pointer;border:none;background:transparent;text-align:left;transition:all .3s ease;border-left:2px solid transparent;font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:10px}
+#page2 .file-tab:hover{color:var(--green-dim);background:rgba(0,255,136,.02)}
+#page2 .file-tab.active{color:var(--green);border-left-color:var(--green);background:rgba(0,255,136,.04)}
+#page2 .file-tab .tab-num{color:var(--green-dim);opacity:.4;font-size:8px;min-width:16px}
+#page2 .file-tab.active .tab-num{opacity:.8}
+#page2 .file-tab.visited .tab-num::after{content:' ✓';font-size:7px;color:var(--green-dim);opacity:.5}
+#page2 .file-tab.mission-tab{border-top:1px solid rgba(255,51,68,.1);margin-top:8px;padding-top:12px;color:var(--red);opacity:.7}
+#page2 .file-tab.mission-tab:hover{color:var(--red);opacity:1;background:rgba(255,51,68,.04)}
+@keyframes tabGlitch{0%{transform:translate(0);opacity:1}10%{transform:translate(-3px,1px);opacity:.7}20%{transform:translate(2px,-1px);opacity:1}30%{transform:translate(-1px,2px);opacity:.8;color:var(--cyan)}40%{transform:translate(3px,0);opacity:1;color:var(--green)}100%{transform:translate(0);opacity:1}}
+.file-tab.glitching{animation:tabGlitch .3s steps(1)}
+@keyframes tabsFlicker{0%{opacity:1}15%{opacity:.3}25%{opacity:1}35%{opacity:.5}45%{opacity:1}55%{opacity:.2}65%{opacity:1}100%{opacity:1}}
+.file-tabs.flickering .file-tab{animation:tabsFlicker .25s steps(1)}
+@keyframes uiGlitch1{0%{transform:translate(0);opacity:1}5%{transform:translate(-3px,1px);opacity:.6}10%{transform:translate(2px,-1px);opacity:1}15%{transform:translate(-1px,0);opacity:.4;color:var(--cyan)}20%{transform:translate(3px,1px);opacity:1;color:inherit}100%{transform:translate(0);opacity:1}}
+@keyframes uiGlitch2{0%{transform:translate(0);opacity:1}8%{transform:translate(2px,0)skewX(2deg);opacity:.5;filter:hue-rotate(90deg)}16%{transform:translate(-3px,1px)skewX(-3deg);opacity:1;filter:none}24%{transform:translate(1px,-1px);opacity:.3}32%{transform:translate(0);opacity:1}100%{transform:translate(0);opacity:1}}
+.ui-glitching{animation:uiGlitch1 .35s steps(1)}
+.ui-glitching-alt{animation:uiGlitch2 .4s steps(1)}
+
+#page2 .canvas-area{flex:1;position:relative;overflow:hidden}
+#page2 .d-canvas{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;transition:opacity 1.2s ease;pointer-events:none}
+#page2 .d-canvas.active{opacity:1}
+#page2 .left-footer{padding:16px 24px;border-top:1px solid rgba(0,255,136,.06);font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--grey);line-height:2;flex-shrink:0}
+#page2 .left-footer .val{color:var(--green-dim)}#page2 .left-footer .warn{color:var(--amber)}
+
+#page2 .right-panel{width:65%;height:100%;display:flex;flex-direction:column}
+#page2 .right-header{padding:16px 40px;border-bottom:1px solid rgba(0,255,136,.06);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:rgba(10,10,10,.95)}
+#page2 .right-header .doc-info{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--grey)}
+#page2 .right-header .doc-info .g{color:var(--green-dim)}
+#page2 .right-header .status{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--grey)}
+#page2 .right-header .status .a{color:var(--amber)}
+
+#page2 .reading-pane{flex:1;overflow-y:auto;padding:40px 48px 120px}
+#page2 .reading-pane::-webkit-scrollbar{width:3px}
+#page2 .reading-pane::-webkit-scrollbar-thumb{background:rgba(0,255,136,.12);border-radius:2px}
+#page2 .file-content{display:none}#page2 .file-content.active{display:block}
+#page2 .file-header{margin-bottom:36px;padding-bottom:20px;border-bottom:1px solid rgba(0,255,136,.06)}
+#page2 .file-header .file-id{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--green-dim);opacity:.4;margin-bottom:10px}
+#page2 .file-header .file-title{font-family:'Outfit',sans-serif;font-size:26px;font-weight:600;color:var(--green);letter-spacing:1px;text-shadow:0 0 30px rgba(0,255,136,.08)}
+#page2 .file-header .file-class{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-top:8px;opacity:.5}
+#page2 .file-body{line-height:1.85;font-size:13px;font-weight:300;color:var(--white);opacity:.85}
+#page2 .file-body p{margin-bottom:18px}
+#page2 .file-body .highlight{color:var(--green);font-weight:500}
+#page2 .file-body .key-line{font-size:14px;font-weight:500;color:var(--green);margin:28px 0;padding:14px 0;border-top:1px solid rgba(0,255,136,.05);border-bottom:1px solid rgba(0,255,136,.05)}
+#page2 .file-body .stat-line{font-size:11px;color:var(--grey-light);border-left:2px solid rgba(0,255,136,.12);padding-left:16px;margin:22px 0;font-style:italic}
+
+#page2 .nav-bar{position:absolute;bottom:0;left:0;right:0;padding:20px 48px;background:linear-gradient(0deg,rgba(10,10,10,1),rgba(10,10,10,.95) 70%,transparent);display:flex;align-items:center;justify-content:space-between;z-index:50}
+.nav-btn{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:400;letter-spacing:4px;text-transform:uppercase;color:var(--green-dim);background:transparent;border:1px solid rgba(0,255,136,.15);padding:10px 24px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:8px}
+.nav-btn:hover{color:var(--green);border-color:var(--green);background:rgba(0,255,136,.03)}
+.nav-btn:disabled{opacity:.2;cursor:default;pointer-events:none}
+.nav-btn .arrow{font-size:14px}
+.nav-counter{font-size:9px;letter-spacing:3px;color:var(--grey);text-transform:uppercase}
+.nav-counter .current{color:var(--green-dim)}
+
+/* ═══════════════════════════════════ */
+/* PAGE 3 — JOURNEY                    */
+/* ═══════════════════════════════════ */
+#page3{flex-direction:column}
+#page3 .j-top-bar{height:48px;background:rgba(10,10,10,.95);border-bottom:1px solid rgba(0,255,136,.08);display:flex;align-items:center;justify-content:space-between;padding:0 32px;flex-shrink:0}
+#page3 .j-top-bar .logo{font-size:9px;font-weight:700;letter-spacing:4px;color:var(--green-dim);opacity:.6}
+#page3 .j-top-bar .back-link{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--grey);cursor:pointer;transition:color .3s}
+#page3 .j-top-bar .back-link:hover{color:var(--green)}
+#page3 .j-top-bar .status{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--grey)}
+#page3 .j-top-bar .status .r{color:var(--red)}
+#page3 .j-map-area{flex:1;position:relative}
+#page3 #mapCanvas{position:absolute;top:0;left:0;width:100%;height:100%}
+
+.phase-overlay{position:fixed;z-index:50;display:none;pointer-events:none}
+.phase-overlay.active{display:block}
+.phase-card{background:rgba(10,10,10,.92);border:1px solid rgba(0,255,136,.15);padding:20px 24px;max-width:320px;backdrop-filter:blur(10px);pointer-events:auto;animation:cardIn .4s ease}
+@keyframes cardIn{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
+.phase-card .phase-num{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--green-dim);opacity:.5;margin-bottom:6px}
+.phase-card .phase-title{font-family:'Outfit',sans-serif;font-size:18px;font-weight:600;color:var(--green);margin-bottom:10px}
+.phase-card .phase-loc{font-size:9px;letter-spacing:2px;color:var(--red);margin-bottom:12px;opacity:.7}
+.phase-card .phase-loc .redact{background:var(--red);color:var(--red);padding:0 6px;font-size:8px}
+.phase-card .phase-desc{font-size:12px;font-weight:300;line-height:1.7;color:var(--white);opacity:.8}
+.phase-card .phase-desc .hl{color:var(--green);font-weight:500}
+
+#page3 .j-bottom-bar{height:56px;background:rgba(10,10,10,.95);border-top:1px solid rgba(0,255,136,.06);display:flex;align-items:center;justify-content:space-between;padding:0 32px;flex-shrink:0}
+
+/* CTA Modal */
+.cta-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(5,5,5,.85);z-index:800;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+.cta-overlay.visible{display:flex}
+.cta-modal{background:rgba(12,12,12,.95);border:1px solid rgba(0,255,136,.15);padding:48px 56px;max-width:520px;text-align:center;animation:modalIn .6s ease}
+@keyframes modalIn{0%{opacity:0;transform:scale(.95) translateY(10px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+.cta-modal .cta-icon{font-size:28px;margin-bottom:20px;display:inline-block;animation:pulse-icon 2s ease infinite}
+@keyframes pulse-icon{0%,100%{opacity:.6}50%{opacity:1}}
+.cta-modal .cta-title{font-family:'Outfit',sans-serif;font-size:22px;font-weight:600;color:var(--green);margin-bottom:16px;line-height:1.4}
+.cta-modal .cta-body{font-size:13px;font-weight:300;color:var(--white);opacity:.75;line-height:1.8;margin-bottom:32px}
+.cta-modal .cta-body .num{color:var(--green);font-weight:700;font-size:15px}
+.cta-modal .cta-btn{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;letter-spacing:5px;text-transform:uppercase;color:var(--green);background:transparent;border:1px solid rgba(0,255,136,.25);padding:14px 40px;cursor:pointer;transition:all .4s ease;text-decoration:none;display:inline-block}
+.cta-modal .cta-btn:hover{background:rgba(0,255,136,.04);border-color:var(--green);box-shadow:0 0 40px rgba(0,255,136,.08);letter-spacing:7px}
+.cta-modal .cta-footer{margin-top:24px;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--grey);opacity:.4}
+
+@media(max-width:768px){
+  .stripe-logo{font-size:52px}
+  .stripe-logo.g4::before,.stripe-logo.g4::after,.stripe-logo.g-chaos::before,.stripe-logo.g-chaos::after{font-size:52px}
+  .stripe-revealed{font-size:28px;letter-spacing:6px}
+  .origins-sub{font-size:9px;letter-spacing:8px}
+  .agents-of{font-size:9px;letter-spacing:8px}
+  .standby-msg{font-size:12px;letter-spacing:2px}
+  .win-popup{width:340px}
+  #page2{flex-direction:column}
+  #page2 .left-panel{width:100%;height:auto;max-height:40vh;border-right:none;border-bottom:1px solid rgba(0,255,136,.06)}
+  #page2 .right-panel{width:100%;flex:1}
+  #page2 .file-tabs{flex-direction:row;flex-wrap:wrap;gap:0}
+  #page2 .file-tab{border-left:none;border-bottom:2px solid transparent;padding:8px 10px;font-size:8px}
+  #page2 .file-tab.active{border-bottom-color:var(--green);border-left-color:transparent}
+  #page2 .reading-pane{padding:24px 20px 100px}
+  #page2 .left-footer{display:none}
+  .phase-card{max-width:260px;padding:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════ -->
+<!-- GLITCH TRANSITION OVERLAY          -->
+<!-- ═══════════════════════════════════ -->
+<div class="page-transition" id="pageTransition"></div>
+
+<!-- ═══════════════════════════════════ -->
+<!-- PAGE 1 — ENTRY                     -->
+<!-- ═══════════════════════════════════ -->
+<div class="page active" id="page1">
+  <div class="grid-bg" id="gridBg"></div>
+  <canvas id="globeCanvas1" width="700" height="700"></canvas>
+  <div class="p1-flash p1-flash-green" id="p1fG"></div>
+  <div class="p1-flash p1-flash-white" id="p1fW"></div>
+  <div class="p1-flash p1-flash-red" id="p1fR"></div>
+  <div class="p1-flash p1-flash-cyan" id="p1fC"></div>
+  <div class="p1-flash p1-flash-magenta" id="p1fM"></div>
+  <div class="p1-screen-tear" id="p1Tear"></div>
+  <div class="p1-code-rain" id="p1CodeRain"></div>
+  <div class="p1-coord-flash" id="p1CoordFlash"></div>
+  <div class="p1-phrase-flicker" id="p1Phrase"></div>
+  <div class="p1-rgb-split" id="p1RGB"></div>
+  <div class="standby-msg" id="standbyMsg">Origins Protocol activated. Stand by<span class="dots"></span></div>
+
+  <div class="win-overlay" id="winOverlay">
+    <div class="win-popup">
+      <div class="win-titlebar"><div class="title-text"><div class="title-icon">!</div><span>S.T.R.I.P.E. — System Alert</span></div><div class="win-close" id="winClose">×</div></div>
+      <div class="win-body"><div class="win-icon"><div class="tri"></div></div><div class="win-text"><div class="alert-title">⚠ PAYMASTER ATTACK DETECTED</div><div class="alert-msg">Critical breach across 3 network nodes.<br>System integrity degrading.<br>Emergency protocols available.</div><div class="alert-code">ERR::PAYMASTER_BREACH // SEVERITY: CRITICAL // 06:14 GMT</div><div class="alert-msg" style="margin-top:12px;font-weight:600">Origins Protocol recommended.</div></div></div>
+      <div class="win-footer"><button class="win-btn" id="btnDismiss">Dismiss</button><button class="win-btn primary" id="btnProtocol">Initiate Origins Protocol</button></div>
+    </div>
+  </div>
+
+  <div class="p1-classification" id="p1Class"><span class="dot"></span> restricted — operator eyes only</div>
+  <div class="p1-container">
+    <div class="stripe-logo" id="stripeLogo" data-text="stripe"></div>
+    <div class="p1-logo-block" id="logoBlock">
+      <div class="agents-of" id="agentsOf"></div>
+      <div class="stripe-revealed" id="stripeRevealed">S.T.R.I.P.E</div>
+      <div class="origins-sub" id="originsSub">Origins Protocol</div>
+    </div>
+    <div class="p1-divider" id="p1Divider"></div>
+    <div class="p1-prompt" id="p1Prompt"><span id="p1TypedText"></span><span class="cursor"></span></div>
+    <div class="p1-cta" id="p1Cta"><a href="#" id="p1ProceedBtn">PROCEED →</a></div>
+  </div>
+  <div class="p1-status-bar" id="p1StatusBar">
+    <span>S.T.R.I.P.E. // NETWORK v4.7.1</span>
+    <span>CLEARANCE: <span class="s-green">VERIFIED</span></span>
+    <span>SYSTEM STATUS: <span class="s-amber">MONITORING</span></span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ -->
+<!-- PAGE 2 — DOSSIER                   -->
+<!-- ═══════════════════════════════════ -->
+<div class="page" id="page2">
+  <div class="left-panel">
+    <div class="left-header">
+      <div class="logo">S.T.R.I.P.E. // DOSSIER</div>
+      <div class="file-tabs" id="fileTabs">
+        <div class="file-tab active" data-file="0"><span class="tab-num">00</span>The Truth</div>
+        <div class="file-tab" data-file="1"><span class="tab-num">01</span>Origins</div>
+        <div class="file-tab" data-file="2"><span class="tab-num">02</span>The Agency</div>
+        <div class="file-tab" data-file="3"><span class="tab-num">03</span>The Threat</div>
+        <div class="file-tab" data-file="4"><span class="tab-num">04</span>Activation</div>
+        <div class="file-tab mission-tab" id="missionTab"><span class="tab-num" style="color:var(--red);opacity:.8">⚠</span>View Mission</div>
+      </div>
+    </div>
+    <div class="canvas-area">
+      <canvas class="d-canvas active" id="dbg0"></canvas>
+      <canvas class="d-canvas" id="dbg1"></canvas>
+      <canvas class="d-canvas" id="dbg2"></canvas>
+      <canvas class="d-canvas" id="dbg3"></canvas>
+      <canvas class="d-canvas" id="dbg4"></canvas>
+    </div>
+    <div class="left-footer">CLEARANCE: <span class="val">LEVEL 4</span><br>NETWORK: <span class="val">ACTIVE</span><br>INTEGRITY: <span class="warn">DEGRADING</span></div>
+  </div>
+  <div class="right-panel">
+    <div class="right-header"><div class="doc-info">ORIGINS PROTOCOL // <span class="g">ACTIVE</span></div><div class="status">SYSTEM: <span class="a">MONITORING</span></div></div>
+    <div class="reading-pane" id="readingPane">
+      <div class="file-content active" id="dfile0"><div class="file-header"><div class="file-id">S.T.R.I.P.E. // Preamble // Declassified</div><div class="file-title">The Truth</div><div class="file-class">Classification: Restricted — Operator Eyes Only</div></div><div class="file-body" id="dbody0"><p>What you've been told about Stripe is only half the truth.</p><p>The story the world knows: two brothers from Ireland launched a payments company in 2011. Seven lines of code. Global payments. A startup that scaled.</p><p>That story is true. It is also incomplete.</p><p class="key-line">This is the real story.</p></div></div>
+      <div class="file-content" id="dfile1"><div class="file-header"><div class="file-id">S.T.R.I.P.E. // File 01 of 04 // Declassified</div><div class="file-title">Origins</div><div class="file-class">Classification: Restricted — Operator Eyes Only</div></div><div class="file-body" id="dbody1"><p>Before 2010, moving money was rigged. A network of banks and processors — codenamed <span class="highlight">The Paymasters</span> — taxed every transaction, slowed every transfer, and locked founders out of global markets. Friction wasn't a bug. It was their business model.</p><p>A group of engineers decided to end it. They went underground. They called themselves <span class="highlight">S.T.R.I.P.E.</span> — <span class="highlight">S</span>ystem for <span class="highlight">R</span>outing <span class="highlight">I</span>nformation, <span class="highlight">P</span>ayments & <span class="highlight">E</span>xchange. Part resistance, part clandestine strike force. One mandate: <span class="highlight">democratise online commerce</span>. In 2011, they surfaced a public face — a payments company by the same name. The world saw a clean API. S.T.R.I.P.E. was victorious. The Paymasters' architecture wasn't dismantled — it was made irrelevant.</p></div></div>
+      <div class="file-content" id="dfile2"><div class="file-header"><div class="file-id">S.T.R.I.P.E. // File 02 of 04 // Declassified</div><div class="file-title">The Agency</div><div class="file-class">Classification: Restricted — Operator Eyes Only</div></div><div class="file-body" id="dbody2"><p>As Stripe scaled — billions processed, 46 countries — S.T.R.I.P.E. did not dissolve. It evolved into <span class="highlight">an elite clandestine agency</span> protecting the system they'd built. No offices — safehouses. No employees — operatives. No job titles — clearance levels. Three functions: Identify threats. Neutralise friction. Protect the network.</p><p>S.T.R.I.P.E. has never been publicly acknowledged. No filing. No press release. No earnings call. When the system runs smoothly, no one knows they're there. <span class="highlight">When it's under attack, they activate.</span></p></div></div>
+      <div class="file-content" id="dfile3"><div class="file-header"><div class="file-id">S.T.R.I.P.E. // File 03 of 04 // Declassified</div><div class="file-title">The Threat</div><div class="file-class">Classification: Critical — Immediate Action Required</div></div><div class="file-body" id="dbody3"><p>The Paymasters didn't disappear. They evolved.</p><p>Unable to outbuild Stripe, the old guard now wages a <span class="highlight">shadow war</span> — determined to reclaim control of the system they once ruled. For over a decade, S.T.R.I.P.E. has held them off. Mostly invisible. Mostly successful. But the Paymasters are patient. And they have been escalating.</p><p>At <span class="highlight">06:14 GMT this morning</span>, they struck. Three critical components of the S.T.R.I.P.E. network were intercepted in a coordinated strike and scattered across London. The system is still running — but it's bleeding. Without intervention, routing fails, coordination collapses, and the Paymasters take back control.</p><p class="key-line">Estimated time to irreversible system failure: 90 minutes.</p></div></div>
+      <div class="file-content" id="dfile4"><div class="file-header"><div class="file-id">S.T.R.I.P.E. // File 04 of 04 // Declassified</div><div class="file-title">Activation</div><div class="file-class">Classification: Critical — Immediate Action Required</div></div><div class="file-body" id="dbody4"><p>Engineers can't solve this one.</p><p>The Paymasters aren't attacking the infrastructure. They're attacking the people that defend it. This threat needs a different kind of operative — people who can mobilise others, coordinate on the move, and act on incomplete information.</p><p class="key-line">Community builders. Operators. Connectors.</p><p>You have been identified. Three components. Three teams. Three locations across London. No team completes the mission alone. <span class="highlight">The rails exist. The system needs operators. You have been activated.</span></p></div></div>
+    </div>
+    <div class="nav-bar"><button class="nav-btn" id="dPrevBtn" disabled><span class="arrow">←</span> PREVIOUS</button><div class="nav-counter">FILE <span class="current" id="dNavCurrent">01</span> / 05</div><button class="nav-btn" id="dNextBtn">NEXT <span class="arrow">→</span></button></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ -->
+<!-- PAGE 3 — JOURNEY                   -->
+<!-- ═══════════════════════════════════ -->
+<div class="page" id="page3">
+  <div class="j-top-bar"><span class="back-link" id="jBackBtn">← DOSSIER</span><div class="logo">S.T.R.I.P.E. // MISSION BRIEFING</div><div class="status">STATUS: <span class="r">ACTIVE</span></div></div>
+  <div class="j-map-area"><canvas id="mapCanvas"></canvas></div>
+
+  <div class="phase-overlay" id="phase1"><div class="phase-card"><div class="phase-num">Phase 01</div><div class="phase-title">Arrival & Extraction</div><div class="phase-loc">LOCATION: <span class="redact">[CLASSIFIED]</span></div><div class="phase-desc">Guests arrive expecting a Stripe dinner. Instead — the venue is compromised. Police tape. Suited operators. A single line: <span class="hl">"This location is no longer secure."</span> No explanation. Transport is waiting. Guests are extracted.</div></div></div>
+  <div class="phase-overlay" id="phase2"><div class="phase-card"><div class="phase-num">Phase 02</div><div class="phase-title">Transit Briefing</div><div class="phase-loc">LOCATION: <span class="redact">[IN TRANSIT]</span></div><div class="phase-desc">Guests are placed into vehicles. Inside, a transmission plays — intelligence briefing style. S.T.R.I.P.E. exists. The Paymasters have acted. Three components stolen. <span class="hl">The system requires operators.</span></div></div></div>
+  <div class="phase-overlay" id="phase3"><div class="phase-card"><div class="phase-num">Phase 03</div><div class="phase-title">Deployment</div><div class="phase-loc">LOCATION: <span class="redact">[CLASSIFIED]</span></div><div class="phase-desc">Guests arrive at the staging point. 30 people split into 3 teams of 10. Each team receives partial system access and incomplete information. <span class="hl">No team can see the full picture alone.</span></div></div></div>
+  <div class="phase-overlay" id="phase4"><div class="phase-card"><div class="phase-num">Phase 04</div><div class="phase-title">Distributed Mission</div><div class="phase-loc">LOCATION: <span class="redact">[3 SITES — CLASSIFIED]</span></div><div class="phase-desc">Each team is sent to a different location across London. A node exists at each site. Teams must communicate via phone, share information, and coordinate actions. <span class="hl">Collaboration under constraint.</span></div></div></div>
+  <div class="phase-overlay" id="phase5"><div class="phase-card"><div class="phase-num">Phase 05</div><div class="phase-title">Convergence</div><div class="phase-loc">LOCATION: <span class="redact">[CLASSIFIED]</span></div><div class="phase-desc">All teams are directed to a final location. Each brings a recovered component. Together, they restore system integrity. <span class="hl">The network is whole again.</span></div></div></div>
+  <div class="phase-overlay" id="phase6"><div class="phase-card"><div class="phase-num">Phase 06</div><div class="phase-title">HQ — Dinner</div><div class="phase-loc">LOCATION: <span class="redact">[CLASSIFIED — HQ]</span></div><div class="phase-desc">Guests enter S.T.R.I.P.E. headquarters. The dinner is not incidental. It is <span class="hl">earned.</span> The mission resolves. The world clicks into place. The experience they just shared becomes the story they'll tell for months — and associate with Stripe.</div></div></div>
+
+  <div class="j-bottom-bar"><button class="nav-btn" id="jPrevBtn" disabled><span class="arrow">←</span> PREVIOUS</button><div class="nav-counter">PHASE <span class="current" id="jNavCurrent">01</span> / 06</div><button class="nav-btn" id="jNextBtn">NEXT <span class="arrow">→</span></button></div>
+</div>
+
+<!-- CTA Modal -->
+<div class="cta-overlay" id="ctaOverlay">
+  <div class="cta-modal">
+    <div class="cta-icon">🎩</div>
+    <div class="cta-title">The Origins Protocol needs<br>30 new recruits.</div>
+    <div class="cta-body">Will you send your community builders on this mission?<br><br><span class="num">30</span> operatives. One night. London.<br>An experience they'll talk about for months — and associate with your brand.</div>
+    <a class="cta-btn" href="mailto:josh@generalist.company?subject=Origins%20Protocol%20—%20Let's%20Talk">INITIATE CONTACT →</a>
+    <div class="cta-footer">S.T.R.I.P.E. // We await your transmission</div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════
+// PAGE TRANSITION SYSTEM
+// ═══════════════════════════════════
+function glitchTransition(fromId, toId, cb) {
+  const overlay = document.getElementById('pageTransition');
+  overlay.innerHTML = '';
+  overlay.classList.add('active');
+
+  const colors = ['#00ff88','#00e5ff','#ff3344','#ff00ff','#ffaa00','#fff'];
+  const frags = ['ERROR','ROUTING...','DECRYPT','>> ACCESS','NODE_SYNC','PROTOCOL','TRANSFER','LOADING...','BREACH','SYSTEM','CONNECT','VERIFY'];
+
+  // Create tear bands and code fragments
+  for (let i = 0; i < 12; i++) {
+    const band = document.createElement('div');
+    band.className = 'flash-band';
+    band.style.top = (Math.random() * 100) + '%';
+    band.style.height = (2 + Math.random() * 8) + 'px';
+    band.style.background = colors[Math.floor(Math.random() * colors.length)];
+    overlay.appendChild(band);
+  }
+  for (let i = 0; i < 20; i++) {
+    const frag = document.createElement('div');
+    frag.className = 'code-frag';
+    frag.textContent = frags[Math.floor(Math.random() * frags.length)];
+    frag.style.left = (Math.random() * 90 + 5) + '%';
+    frag.style.top = (Math.random() * 90 + 5) + '%';
+    frag.style.color = colors[Math.floor(Math.random() * colors.length)];
+    frag.style.fontSize = (8 + Math.random() * 6) + 'px';
+    overlay.appendChild(frag);
+  }
+
+  // Animate — flicker bands and fragments
+  let step = 0;
+  const bands = overlay.querySelectorAll('.flash-band');
+  const cfrags = overlay.querySelectorAll('.code-frag');
+
+  function animate() {
+    if (step > 20) {
+      // Switch pages
+      document.getElementById(fromId).classList.remove('active');
+      document.getElementById(toId).classList.add('active');
+
+      // Fade out
+      let fadeStep = 0;
+      function fadeOut() {
+        if (fadeStep > 8) {
+          overlay.classList.remove('active');
+          overlay.innerHTML = '';
+          if (cb) cb();
+          return;
+        }
+        bands.forEach(b => b.style.opacity = Math.random() < .3 ? (.3 - fadeStep * .04) : 0);
+        cfrags.forEach(f => f.style.opacity = Math.random() < .2 ? (.2 - fadeStep * .03) : 0);
+        fadeStep++;
+        setTimeout(fadeOut, 30);
+      }
+      fadeOut();
+      return;
+    }
+
+    // Flash random bands
+    bands.forEach(b => {
+      b.style.opacity = Math.random() < .4 ? (.1 + Math.random() * .6) : 0;
+      b.style.top = (Math.random() * 100) + '%';
+      b.style.transform = `translateX(${(Math.random()-.5)*20}px)`;
+    });
+    // Flash random code frags
+    cfrags.forEach(f => {
+      f.style.opacity = Math.random() < .3 ? (.5 + Math.random() * .5) : 0;
+    });
+
+    // Black flash at midpoint
+    if (step === 10) {
+      overlay.style.background = 'var(--black)';
+      overlay.style.opacity = '1';
+    } else if (step === 12) {
+      overlay.style.background = 'transparent';
+    }
+
+    step++;
+    setTimeout(animate, 35);
+  }
+  animate();
+}
+
+// ═══════════════════════════════════
+// PAGE 1 — ENTRY LOGIC
+// ═══════════════════════════════════
+const CHARS='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%&';
+const stripeLogo=document.getElementById('stripeLogo');
+const TARGET='stripe';
+
+function p1Flash(id){const el=document.getElementById(id);el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash')}
+function p1Tear(){const el=document.getElementById('p1Tear');el.classList.remove('active');void el.offsetWidth;el.classList.add('active')}
+function p1RGB(){const el=document.getElementById('p1RGB');el.classList.remove('active');void el.offsetWidth;el.classList.add('active')}
+
+function p1CoordFlash(){
+  const el=document.getElementById('p1CoordFlash');el.classList.add('active');el.innerHTML='';
+  const c=['51.5074° N','NODE_03 // COMPROMISED','06:14 GMT // BREACH','INTEGRITY: 67%','INTERCEPT // PAYMASTER','CELL_07 // DARK','LEVEL 4'];
+  for(let i=0;i<15;i++){const s=document.createElement('span');s.textContent=c[Math.floor(Math.random()*c.length)];s.style.left=Math.random()*85+5+'%';s.style.top=Math.random()*85+5+'%';s.style.fontSize=(7+Math.random()*7)+'px';s.style.color=`rgba(0,255,136,${.2+Math.random()*.4})`;s.style.animationDuration=(.3+Math.random()*.5)+'s';el.appendChild(s)}
+  setTimeout(()=>{el.classList.remove('active');el.innerHTML=''},600)
+}
+
+function p1CodeRain(){
+  const el=document.getElementById('p1CodeRain');el.classList.add('active');el.innerHTML='';
+  const frags=['throw new Error("BREACH");','if (paymaster.active) {','rm -rf /paymasters/*','>> ORIGINS_PROTOCOL.exe','socket.emit("activate");','[ SIGNAL LOST ]','kill -9 $(pgrep paymaster)','> system.status = "DEGRADING"'];
+  const colors=['#00ff88','#00e5ff','#ff3344','#ff00ff','#ffaa00','#e0e0e0'];
+  for(let i=0;i<20;i++){const s=document.createElement('div');s.className='frag';s.textContent=frags[Math.floor(Math.random()*frags.length)];s.style.left=Math.random()*90+2+'%';s.style.top=Math.random()*90+2+'%';s.style.fontSize=(8+Math.random()*5)+'px';s.style.color=colors[Math.floor(Math.random()*colors.length)];s.style.animationDuration=(.3+Math.random()*.6)+'s';s.style.animationDelay=(Math.random()*.3)+'s';s.style.opacity=0;el.appendChild(s)}
+  setTimeout(()=>{el.classList.remove('active');el.innerHTML=''},900)
+}
+
+function p1PhraseFlicker(cb){
+  const phrases=['CLASSIFIED','REDACTED','LEVEL 4','OPERATOR EYES ONLY','ACTIVATED','BREACH DETECTED','ORIGINS PROTOCOL'];
+  const el=document.getElementById('p1Phrase');
+  const colors=['#00ff88','#00e5ff','#ff3344','#ff00ff'];let idx=0;
+  function flicker(){if(idx>=7){el.style.opacity='0';if(cb)cb();return}
+    el.textContent=phrases[Math.floor(Math.random()*phrases.length)];el.style.opacity='.8';el.style.left=(15+Math.random()*70)+'%';el.style.top=(25+Math.random()*50)+'%';el.style.transform=`translate(-50%,-50%) rotate(${(Math.random()-.5)*6}deg) scale(${.8+Math.random()*.5})`;el.style.color=colors[Math.floor(Math.random()*colors.length)];
+    setTimeout(()=>{el.style.opacity='0';setTimeout(()=>{idx++;flicker()},30)},80)}
+  flicker()
+}
+
+function p1TypePrompt(text,i,cb){if(i<text.length){document.getElementById('p1TypedText').textContent+=text[i];const d=text[i]==='.'?220:text[i]===' '?80:45+Math.random()*25;setTimeout(()=>p1TypePrompt(text,i+1,cb),d)}else if(cb)cb()}
+
+function p1TypeAgents(cb){
+  const el=document.getElementById('agentsOf');const text='AGENTS OF';el.innerHTML='';
+  for(let i=0;i<text.length;i++){const s=document.createElement('span');s.className='ch';s.textContent=text[i]===' '?'\u00A0':text[i];el.appendChild(s)}
+  let idx=0;function t(){if(idx<text.length){el.children[idx].classList.add('on');idx++;setTimeout(t,55+Math.random()*20)}else if(cb)setTimeout(cb,200)}t()
+}
+
+function matrixType(cb){
+  stripeLogo.innerHTML='';const spans=[];
+  for(let i=0;i<TARGET.length;i++){const s=document.createElement('span');s.className='matrix-char';s.textContent=CHARS[Math.floor(Math.random()*CHARS.length)];stripeLogo.appendChild(s);spans.push(s)}
+  stripeLogo.classList.add('visible');
+  let settled=0;
+  spans.forEach((span,i)=>{setTimeout(()=>{const cycles=6+Math.floor(Math.random()*5);let count=0;const iv=setInterval(()=>{span.textContent=CHARS[Math.floor(Math.random()*CHARS.length)];count++;if(count>=cycles){clearInterval(iv);span.textContent=TARGET[i];span.classList.add('settled');settled++;if(settled===TARGET.length&&cb)setTimeout(cb,600)}},50)},i*180)})
+}
+
+// Entry sequence
+setTimeout(()=>{
+  matrixType(()=>{
+    setTimeout(()=>{stripeLogo.classList.add('g1');setTimeout(()=>stripeLogo.classList.remove('g1'),200)},400);
+    setTimeout(()=>{stripeLogo.classList.add('g2');p1CoordFlash();setTimeout(()=>stripeLogo.classList.remove('g2'),500)},1000);
+    setTimeout(()=>{stripeLogo.classList.add('g3');p1CodeRain();p1Flash('p1fR');setTimeout(()=>stripeLogo.classList.remove('g3'),700)},1800);
+    setTimeout(()=>{stripeLogo.classList.add('g3');p1Tear();p1CoordFlash();p1Flash('p1fC');setTimeout(()=>stripeLogo.classList.remove('g3'),600)},2800);
+    setTimeout(()=>{stripeLogo.classList.add('g4');p1CodeRain();p1CoordFlash();p1RGB();p1Flash('p1fM');setTimeout(()=>stripeLogo.classList.remove('g4'),800)},3700);
+    setTimeout(()=>{stripeLogo.classList.add('g4');p1Tear();p1CodeRain();p1Flash('p1fR');setTimeout(()=>{p1Flash('p1fC');p1CoordFlash()},300);setTimeout(()=>stripeLogo.classList.remove('g4'),900)},4800);
+    setTimeout(()=>{stripeLogo.classList.add('g3');p1CoordFlash();setTimeout(()=>{p1CodeRain();p1Flash('p1fR')},400);setTimeout(()=>{stripeLogo.classList.remove('g3');setTimeout(()=>{document.getElementById('winOverlay').classList.add('visible')},400)},1200)},6000);
+  })
+},800);
+
+// Protocol button → chaos → reveal
+document.getElementById('btnProtocol').addEventListener('click',()=>{
+  document.getElementById('winOverlay').classList.remove('visible');
+  stripeLogo.classList.add('g-chaos');p1Tear();p1RGB();p1CodeRain();p1CoordFlash();p1Flash('p1fR');
+  setTimeout(()=>{p1CodeRain();p1CoordFlash();p1Flash('p1fC')},150);
+  setTimeout(()=>{p1CodeRain();p1Flash('p1fM');p1Tear()},300);
+  setTimeout(()=>{p1CodeRain();p1Flash('p1fW');
+    p1PhraseFlicker(()=>{
+      // Hide stripe logo and show standby message
+      stripeLogo.style.display='none';
+      p1Flash('p1fG');
+      const standby=document.getElementById('standbyMsg');
+      standby.classList.add('vis');
+      // After standby completes, show the logo block
+      setTimeout(()=>{
+        standby.classList.remove('vis');
+        standby.style.display='none';
+        document.getElementById('logoBlock').classList.add('visible');
+        p1TypeAgents(()=>{
+          document.getElementById('stripeRevealed').classList.add('vis');
+          setTimeout(()=>{document.getElementById('originsSub').classList.add('vis')},400);
+          setTimeout(()=>{document.getElementById('globeCanvas1').classList.add('visible');document.getElementById('gridBg').classList.add('visible')},600);
+          setTimeout(()=>{document.getElementById('p1Class').classList.add('vis');document.getElementById('p1StatusBar').classList.add('vis')},800);
+          setTimeout(()=>{document.getElementById('p1Divider').classList.add('vis')},1200);
+          setTimeout(()=>{document.getElementById('p1Prompt').classList.add('vis');p1TypePrompt('CLEARANCE VERIFIED. PROCEED.',0,()=>{setTimeout(()=>{document.getElementById('p1Cta').classList.add('vis')},500)})},1700);
+        })
+      },1800);
+    })
+  },500);
+});
+
+document.getElementById('btnDismiss').addEventListener('click',()=>{
+  document.getElementById('winOverlay').classList.remove('visible');
+  stripeLogo.classList.add('g3');p1CodeRain();
+  setTimeout(()=>{stripeLogo.classList.remove('g3');stripeLogo.classList.add('g4');p1Tear();p1CoordFlash();p1Flash('p1fR');
+    setTimeout(()=>{stripeLogo.classList.remove('g4');setTimeout(()=>{document.getElementById('winOverlay').classList.add('visible')},600)},800)},500)
+});
+document.getElementById('winClose').addEventListener('click',()=>{document.getElementById('btnDismiss').click()});
+
+// PROCEED → glitch transition to dossier
+document.getElementById('p1ProceedBtn').addEventListener('click',(e)=>{
+  e.preventDefault();
+  glitchTransition('page1','page2',()=>{initDossier()});
+});
+
+// Globe for page 1
+(function(){
+  const c=document.getElementById('globeCanvas1'),ctx=c.getContext('2d'),W=c.width,H=c.height,cxG=W/2,cyG=H/2,Ra=240;let gA=0,fr=0;
+  const nodes=[{lat:51.5,lon:-.12},{lat:37.7,lon:-122.4},{lat:1.35,lon:103.8},{lat:35.6,lon:139.6},{lat:-23.5,lon:-46.6},{lat:6.5,lon:3.3},{lat:19,lon:72.8},{lat:55.7,lon:37.6},{lat:-33.8,lon:151.2}];
+  const conns=[[0,1],[0,5],[1,4],[2,3],[2,6],[5,6],[3,8],[0,7],[0,6],[1,3],[4,5],[2,8]];
+  function proj(lat,lon){const p=lat*Math.PI/180,t=(lon+gA)*Math.PI/180;return{x:cxG+Ra*Math.cos(p)*Math.sin(t),y:cyG-Ra*Math.sin(p),z:Ra*Math.cos(p)*Math.cos(t)}}
+  function draw(){ctx.clearRect(0,0,W,H);fr++;
+    for(let lat=-60;lat<=60;lat+=30){ctx.beginPath();let s=false;for(let lon=0;lon<=360;lon+=3){const p=proj(lat,lon);ctx.strokeStyle=`rgba(0,255,136,${p.z>0?.2:.05})`;ctx.lineWidth=.7;if(!s){ctx.moveTo(p.x,p.y);s=true}else ctx.lineTo(p.x,p.y)}ctx.stroke()}
+    for(let lon=0;lon<360;lon+=30){ctx.beginPath();let s=false;for(let lat=-90;lat<=90;lat+=3){const p=proj(lat,lon);ctx.strokeStyle=`rgba(0,255,136,${p.z>0?.2:.05})`;ctx.lineWidth=.7;if(!s){ctx.moveTo(p.x,p.y);s=true}else ctx.lineTo(p.x,p.y)}ctx.stroke()}
+    ctx.beginPath();ctx.arc(cxG,cyG,Ra,0,Math.PI*2);ctx.strokeStyle='rgba(0,255,136,0.12)';ctx.lineWidth=1.2;ctx.stroke();
+    conns.forEach(([a,b],ci)=>{const pA=proj(nodes[a].lat,nodes[a].lon),pB=proj(nodes[b].lat,nodes[b].lon);if(pA.z>-50&&pB.z>-50){ctx.beginPath();ctx.moveTo(pA.x,pA.y);ctx.lineTo(pB.x,pB.y);ctx.strokeStyle=`rgba(0,255,136,${Math.min(pA.z,pB.z)>0?.18:.04})`;ctx.lineWidth=.8;ctx.stroke();if(Math.min(pA.z,pB.z)>0){const t=((fr*1.5+ci*60)%200)/200;ctx.beginPath();ctx.arc(pA.x+(pB.x-pA.x)*t,pA.y+(pB.y-pA.y)*t,2,0,Math.PI*2);ctx.fillStyle='rgba(0,255,136,0.7)';ctx.fill()}}});
+    nodes.forEach((n,i)=>{const p=proj(n.lat,n.lon);if(p.z>-50){const front=p.z>0,pulse=Math.sin(fr*.05+i*1.2)*.3+.7;if(front){ctx.beginPath();ctx.arc(p.x,p.y,12*pulse,0,Math.PI*2);ctx.fillStyle=`rgba(0,255,136,${.04*pulse})`;ctx.fill();ctx.beginPath();ctx.arc(p.x,p.y,8*pulse,0,Math.PI*2);ctx.fillStyle=`rgba(0,255,136,${.06*pulse})`;ctx.fill()}ctx.beginPath();ctx.arc(p.x,p.y,(front?3.5:2)*pulse,0,Math.PI*2);ctx.fillStyle=`rgba(0,255,136,${(front?.8:.2)*pulse})`;ctx.fill();if(front){ctx.beginPath();ctx.arc(p.x,p.y,1.5,0,Math.PI*2);ctx.fillStyle=`rgba(0,255,136,${.9*pulse})`;ctx.fill()}}});
+    gA+=.12;requestAnimationFrame(draw)}
+  draw()
+})();
+
+// ═══════════════════════════════════
+// PAGE 2 — DOSSIER LOGIC
+// ═══════════════════════════════════
+let dCurrentFile=0;const dTotalFiles=4;const dTypedFiles=new Set();
+let dossierInitialized=false;
+
+function dMatrixType(fileNum){
+  if(dTypedFiles.has(fileNum))return;dTypedFiles.add(fileNum);
+  const body=document.getElementById('dbody'+fileNum);const paras=body.querySelectorAll('p');let delay=0;
+  paras.forEach(el=>{const orig=el.innerHTML;const text=el.textContent;el.style.opacity='0';
+    setTimeout(()=>{let scrambles=0;const max=6;
+      function scramble(){if(scrambles>=max){el.innerHTML=orig;el.style.opacity='.85';el.style.color='';return}
+        let s='';for(let i=0;i<Math.min(text.length,80);i++)s+=CHARS[Math.floor(Math.random()*CHARS.length)];
+        el.style.opacity='1';el.style.color='var(--green)';el.textContent=s;scrambles++;setTimeout(scramble,35)}
+      scramble()},delay);
+    delay+=Math.max(180,Math.min(text.length*1.5,500))});
+  setTimeout(()=>{paras.forEach(el=>{el.style.opacity='.85';el.style.color=''})},delay+2000)
+}
+
+function dGoToFile(num){
+  if(num<0||num>dTotalFiles)return;dCurrentFile=num;
+  const tabs=document.getElementById('fileTabs');tabs.classList.add('flickering');setTimeout(()=>tabs.classList.remove('flickering'),250);
+  document.querySelectorAll('#page2 .file-tab[data-file]').forEach(t=>{t.classList.remove('active','glitching');if(parseInt(t.dataset.file)===num){t.classList.add('active','glitching');setTimeout(()=>t.classList.remove('glitching'),300)}if(parseInt(t.dataset.file)<num)t.classList.add('visited')});
+  document.querySelectorAll('#page2 .file-content').forEach(f=>f.classList.remove('active'));document.getElementById('dfile'+num).classList.add('active');
+  document.querySelectorAll('#page2 .d-canvas').forEach(b=>b.classList.remove('active'));document.getElementById('dbg'+num).classList.add('active');
+  document.getElementById('dNavCurrent').textContent=String(num+1).padStart(2,'0');
+  document.getElementById('dPrevBtn').disabled=num===0;
+  const nextBtn=document.getElementById('dNextBtn');
+  if(num===dTotalFiles){nextBtn.innerHTML='VIEW MISSION <span class="arrow">→</span>';nextBtn.disabled=false}
+  else{nextBtn.innerHTML='NEXT <span class="arrow">→</span>';nextBtn.disabled=false}
+  document.getElementById('readingPane').scrollTop=0;
+  setTimeout(()=>dMatrixType(num),200)
+}
+
+document.getElementById('dNextBtn').addEventListener('click',()=>{
+  if(dCurrentFile===dTotalFiles){glitchTransition('page2','page3',()=>{initJourney()})}
+  else dGoToFile(dCurrentFile+1)
+});
+document.getElementById('dPrevBtn').addEventListener('click',()=>dGoToFile(dCurrentFile-1));
+document.getElementById('missionTab').addEventListener('click',()=>{glitchTransition('page2','page3',()=>{initJourney()})});
+document.querySelectorAll('#page2 .file-tab[data-file]').forEach(tab=>{tab.addEventListener('click',()=>dGoToFile(parseInt(tab.dataset.file)))});
+
+function initDossier(){
+  if(dossierInitialized)return;dossierInitialized=true;
+  setTimeout(()=>dMatrixType(0),400);
+
+  // Delay canvas sizing to ensure layout has painted
+  function sizeDossierCanvases(){
+    const area=document.querySelector('#page2 .canvas-area');
+    if(!area)return;
+    const w=area.clientWidth,h=area.clientHeight;
+    if(w>0&&h>0){
+      document.querySelectorAll('#page2 .d-canvas').forEach(c=>{c.width=w;c.height=h});
+    }
+  }
+
+  // Try immediately, then retry after a short delay
+  sizeDossierCanvases();
+  setTimeout(sizeDossierCanvases,100);
+  setTimeout(sizeDossierCanvases,300);
+  window.addEventListener('resize',sizeDossierCanvases);
+
+  startDossierCanvases();
+  // Ambient glitch
+  setInterval(()=>{
+    const tabs=document.getElementById('fileTabs');tabs.classList.add('flickering');setTimeout(()=>tabs.classList.remove('flickering'),250);
+    ['.left-header','.left-footer','.right-header','.nav-bar'].forEach(sel=>{const el=document.querySelector('#page2 '+sel);if(el&&Math.random()<.5){el.classList.add(Math.random()<.5?'ui-glitching':'ui-glitching-alt');setTimeout(()=>{el.classList.remove('ui-glitching');el.classList.remove('ui-glitching-alt')},400)}});
+  },5000);
+}
+
+function startDossierCanvases(){
+  // BG0 (Preamble) — Emblem (rotating S.T.R.I.P.E. insignia)
+  (function(){const c=document.getElementById('dbg0');let fr=0;
+    function draw(){const ctx=c.getContext('2d'),w=c.width,h=c.height;if(!w){requestAnimationFrame(draw);return}ctx.clearRect(0,0,w,h);fr++;const cx=w/2,cy=h/2,rot=fr*.003,pulse=Math.sin(fr*.02)*.05+1;
+      [.6,.47,.33].forEach((rm,ri)=>{const radius=Math.min(w,h)*rm*pulse,off=rot*(ri%2===0?1:-1);ctx.beginPath();for(let i=0;i<=6;i++){const a=(Math.PI/3)*i+off;if(i===0)ctx.moveTo(cx+radius*Math.cos(a),cy+radius*Math.sin(a));else ctx.lineTo(cx+radius*Math.cos(a),cy+radius*Math.sin(a))}ctx.strokeStyle=`rgba(0,255,136,${.2-ri*.04})`;ctx.lineWidth=ri===0?1.5:.9;ctx.stroke()});
+      ctx.beginPath();ctx.arc(cx,cy,Math.min(w,h)*.16*pulse,0,Math.PI*2);ctx.strokeStyle='rgba(0,255,136,0.12)';ctx.lineWidth=.8;ctx.stroke();
+      ctx.beginPath();ctx.arc(cx,cy,3,0,Math.PI*2);ctx.fillStyle=`rgba(0,255,136,${.5+Math.sin(fr*.05)*.3})`;ctx.fill();
+      for(let i=0;i<6;i++){const a=(Math.PI/3)*i+fr*.01,r=Math.min(w,h)*.3+Math.sin(fr*.03+i)*10;ctx.beginPath();ctx.arc(cx+Math.cos(a)*r,cy+Math.sin(a)*r,2,0,Math.PI*2);ctx.fillStyle=`rgba(0,255,136,${.3+Math.sin(fr*.04+i)*.2})`;ctx.fill()}
+      requestAnimationFrame(draw)}draw()})();
+
+  // BG1 (Origin) — Europe map with blocked transmissions
+  (function(){const c=document.getElementById('dbg1');let fr=0;const cities=[{rx:.5,ry:.18,name:'LONDON'},{rx:.48,ry:.13,name:'DUBLIN'},{rx:.55,ry:.35,name:'PARIS'},{rx:.62,ry:.28,name:'BRUSSELS'},{rx:.68,ry:.32,name:'FRANKFURT'},{rx:.72,ry:.22,name:'BERLIN'},{rx:.58,ry:.55,name:'MADRID'},{rx:.78,ry:.55,name:'ROME'},{rx:.82,ry:.45,name:'MILAN'},{rx:.9,ry:.35,name:'VIENNA'},{rx:.88,ry:.25,name:'WARSAW'},{rx:.72,ry:.42,name:'ZURICH'},{rx:.85,ry:.15,name:'STOCKHOLM'},{rx:.65,ry:.65,name:'LISBON'}];
+    const routes=[[0,2],[0,3],[0,1],[2,3],[3,4],[4,5],[2,6],[6,7],[7,8],[8,11],[4,11],[5,10],[10,9],[0,12],[2,11],[1,0]];const txs=[];
+    function draw(){const ctx=c.getContext('2d'),w=c.width,h=c.height;if(!w){requestAnimationFrame(draw);return}ctx.clearRect(0,0,w,h);fr++;
+      if(fr%8===0){const r=routes[Math.floor(Math.random()*routes.length)];const f=cities[r[0]],t=cities[r[1]];txs.push({fx:f.rx,fy:f.ry,tx:t.rx,ty:t.ry,t:0,speed:.008+Math.random()*.006,blocked:Math.random()<.7,bp:.3+Math.random()*.5,dead:false,ff:0})}
+      ctx.strokeStyle='rgba(0,255,136,0.025)';ctx.lineWidth=.3;for(let x=0;x<w;x+=35){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke()}for(let y=0;y<h;y+=35){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}
+      routes.forEach(([a,b])=>{ctx.beginPath();ctx.moveTo(cities[a].rx*w,cities[a].ry*h);ctx.lineTo(cities[b].rx*w,cities[b].ry*h);ctx.strokeStyle='rgba(255,170,0,0.05)';ctx.lineWidth=.4;ctx.stroke()});
+      for(let i=txs.length-1;i>=0;i--){const tr=txs[i];if(tr.dead){txs.splice(i,1);continue}tr.t+=tr.speed;const x=(tr.fx+(tr.tx-tr.fx)*tr.t)*w,y=(tr.fy+(tr.ty-tr.fy)*tr.t)*h;
+        if(tr.blocked&&tr.t>=tr.bp){tr.ff++;if(tr.ff<=8){const fl=tr.ff%2===0;ctx.beginPath();ctx.arc(x,y,8,0,Math.PI*2);ctx.fillStyle=`rgba(255,51,68,${fl?.2:.05})`;ctx.fill();ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fillStyle=`rgba(255,51,68,${fl?.8:.3})`;ctx.fill();ctx.strokeStyle=`rgba(255,51,68,${fl?.6:.2})`;ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(x-4,y-4);ctx.lineTo(x+4,y+4);ctx.stroke();ctx.beginPath();ctx.moveTo(x+4,y-4);ctx.lineTo(x-4,y+4);ctx.stroke()}else tr.dead=true}
+        else if(tr.t>=1){tr.ff++;if(tr.ff<=5){ctx.beginPath();ctx.arc(x,y,6,0,Math.PI*2);ctx.fillStyle='rgba(0,255,136,.15)';ctx.fill()}else tr.dead=true}
+        else{ctx.beginPath();ctx.arc(x,y,2,0,Math.PI*2);ctx.fillStyle='rgba(255,170,0,0.7)';ctx.fill();ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fillStyle='rgba(255,170,0,0.06)';ctx.fill()}}
+      cities.forEach((city,i)=>{const x=city.rx*w,y=city.ry*h,p=Math.sin(fr*.015+i)*.2+.8;ctx.beginPath();ctx.arc(x,y,3*p,0,Math.PI*2);ctx.fillStyle=`rgba(255,170,0,${.35*p})`;ctx.fill();ctx.font='6px JetBrains Mono';ctx.fillStyle=`rgba(255,170,0,${.15*p})`;ctx.fillText(city.name,x+6,y-6)});
+      requestAnimationFrame(draw)}draw()})();
+
+  // BG2 (Agency) — Globe
+  (function(){const c=document.getElementById('dbg2');let angle=0,fr=0;const cities=[{lat:51.5,lon:-.12},{lat:53.3,lon:-6.26},{lat:37.7,lon:-122.4},{lat:48.8,lon:2.3},{lat:52.5,lon:13.4},{lat:35.6,lon:139.6},{lat:1.35,lon:103.8},{lat:6.5,lon:3.3},{lat:-23.5,lon:-46.6},{lat:19,lon:72.8}];const links=[[0,1],[0,2],[0,3],[0,4],[1,2],[2,5],[2,6],[2,8],[6,9],[0,7]];
+    function draw(){const ctx=c.getContext('2d'),w=c.width,h=c.height;if(!w){requestAnimationFrame(draw);return}ctx.clearRect(0,0,w,h);fr++;angle+=.1;const cx=w/2,cy=h/2,R=Math.min(w,h)*.38;
+      function proj(lat,lon){const p=lat*Math.PI/180,t=(lon+angle)*Math.PI/180;return{x:cx+R*Math.cos(p)*Math.sin(t),y:cy-R*Math.sin(p),z:R*Math.cos(p)*Math.cos(t)}}
+      for(let lat=-60;lat<=60;lat+=30){ctx.beginPath();let s=false;for(let lon=0;lon<=360;lon+=3){const p=proj(lat,lon);ctx.strokeStyle=`rgba(0,255,136,${p.z>0?.22:.05})`;ctx.lineWidth=.6;if(!s){ctx.moveTo(p.x,p.y);s=true}else ctx.lineTo(p.x,p.y)}ctx.stroke()}
+      for(let lon=0;lon<360;lon+=30){ctx.beginPath();let s=false;for(let lat=-90;lat<=90;lat+=3){const p=proj(lat,lon);ctx.strokeStyle=`rgba(0,255,136,${p.z>0?.22:.05})`;ctx.lineWidth=.6;if(!s){ctx.moveTo(p.x,p.y);s=true}else ctx.lineTo(p.x,p.y)}ctx.stroke()}
+      ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.strokeStyle='rgba(0,255,136,0.1)';ctx.lineWidth=1;ctx.stroke();
+      links.forEach(([a,b],i)=>{const pA=proj(cities[a].lat,cities[a].lon),pB=proj(cities[b].lat,cities[b].lon);if(pA.z>-50&&pB.z>-50){ctx.beginPath();ctx.moveTo(pA.x,pA.y);ctx.lineTo(pB.x,pB.y);ctx.strokeStyle=`rgba(0,255,136,${Math.min(pA.z,pB.z)>0?.15:.03})`;ctx.lineWidth=.6;ctx.stroke()}});
+      cities.forEach((city,i)=>{const p=proj(city.lat,city.lon);if(p.z>-50){const front=p.z>0,pulse=Math.sin(fr*.04+i)*.3+.7;ctx.beginPath();ctx.arc(p.x,p.y,front?3*pulse:1.5,0,Math.PI*2);ctx.fillStyle=`rgba(0,255,136,${front?.7*pulse:.15})`;ctx.fill()}});
+      requestAnimationFrame(draw)}draw()})();
+
+  // BG3 (Threat) — Degrading network
+  (function(){const c=document.getElementById('dbg3');let fr=0;const nodes=[];for(let i=0;i<15;i++)nodes.push({rx:.1+Math.random()*.8,ry:.1+Math.random()*.8,size:2+Math.random()*1.5,flickerRate:.005+Math.random()*.01});
+    function draw(){const ctx=c.getContext('2d'),w=c.width,h=c.height;if(!w){requestAnimationFrame(draw);return}ctx.clearRect(0,0,w,h);fr++;
+      for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){const dx=(nodes[i].rx-nodes[j].rx)*w,dy=(nodes[i].ry-nodes[j].ry)*h,dist=Math.sqrt(dx*dx+dy*dy);if(dist<150){if(Math.sin(fr*.1+i*j)<.3)continue;const alpha=(1-dist/150)*.12,disrupted=Math.sin(fr*nodes[i].flickerRate*10+j)>.7;ctx.beginPath();ctx.moveTo(nodes[i].rx*w,nodes[i].ry*h);ctx.lineTo(nodes[j].rx*w,nodes[j].ry*h);ctx.strokeStyle=disrupted?`rgba(255,51,68,${alpha*1.5})`:`rgba(0,255,136,${alpha})`;ctx.lineWidth=.6;ctx.setLineDash(disrupted?[4,8]:[]);ctx.stroke();ctx.setLineDash([])}}
+      nodes.forEach((n,i)=>{const disrupted=Math.sin(fr*.02+i*2.5)>.6,pulse=Math.sin(fr*.04+i)*.3+.7,col=disrupted?'255,51,68':'0,255,136';ctx.beginPath();ctx.arc(n.rx*w,n.ry*h,n.size*pulse,0,Math.PI*2);ctx.fillStyle=`rgba(${col},${.5*pulse})`;ctx.fill()});
+      requestAnimationFrame(draw)}draw()})();
+
+  // BG4 (Activation) — London breach
+  (function(){const c=document.getElementById('dbg4');let fr=0;const breach=[{rx:.42,ry:.35,label:'NODE 01 // SHOREDITCH'},{rx:.35,ry:.55,label:'NODE 02 // SOUTHBANK'},{rx:.7,ry:.52,label:'NODE 03 // CANARY WHARF'}];
+    const hSt=[],vSt=[];for(let y=.15;y<.85;y+=.06)hSt.push(y);for(let x=.1;x<.9;x+=.05)vSt.push(x);
+    function draw(){const ctx=c.getContext('2d'),w=c.width,h=c.height;if(!w){requestAnimationFrame(draw);return}ctx.clearRect(0,0,w,h);fr++;
+      ctx.lineWidth=.3;hSt.forEach(y=>{ctx.beginPath();ctx.moveTo(w*.08,y*h);ctx.lineTo(w*.92,y*h);ctx.strokeStyle='rgba(0,255,136,0.04)';ctx.stroke()});vSt.forEach(x=>{ctx.beginPath();ctx.moveTo(x*w,h*.1);ctx.lineTo(x*w,h*.9);ctx.strokeStyle='rgba(0,255,136,0.04)';ctx.stroke()});
+      ctx.beginPath();ctx.moveTo(w*-.02,h*.5);ctx.bezierCurveTo(w*.12,h*.46,w*.2,h*.53,w*.3,h*.48);ctx.bezierCurveTo(w*.38,h*.44,w*.42,h*.5,w*.5,h*.48);ctx.bezierCurveTo(w*.58,h*.46,w*.62,h*.53,w*.68,h*.48);ctx.bezierCurveTo(w*.78,h*.42,w*.85,h*.48,w*1.02,h*.46);ctx.strokeStyle='rgba(0,200,255,0.12)';ctx.lineWidth=4;ctx.stroke();
+      breach.forEach((n,i)=>{const x=n.rx*w,y=n.ry*h,pulse=Math.sin(fr*.06+i*2)*.4+.6,fast=Math.sin(fr*.15+i)>0?1:.6;
+        for(let r=0;r<3;r++){const ring=(fr*.6+i*30+r*20)%70;ctx.beginPath();ctx.arc(x,y,ring,0,Math.PI*2);ctx.strokeStyle=`rgba(255,51,68,${.2*(1-ring/70)})`;ctx.lineWidth=1.2;ctx.stroke()}
+        ctx.beginPath();ctx.arc(x,y,6*pulse*fast,0,Math.PI*2);ctx.fillStyle=`rgba(255,51,68,${.9*pulse})`;ctx.fill();
+        ctx.font='bold 8px JetBrains Mono';ctx.fillStyle=`rgba(255,51,68,${.5*pulse})`;ctx.fillText(n.label,x+14,y-14)});
+      requestAnimationFrame(draw)}draw()})();
+}
+
+// ═══════════════════════════════════
+// PAGE 3 — JOURNEY LOGIC
+// ═══════════════════════════════════
+let jCurrentPhase=1;const jTotalPhases=6;const jRevealed=new Set();let journeyInitialized=false;
+const jPhasePoints=[{rx:.2,ry:.35,label:'ARRIVAL & EXTRACTION'},{rx:.3,ry:.25,label:'TRANSIT'},{rx:.45,ry:.38,label:'STAGING'},{rx:.35,ry:.58,label:'SITE ALPHA'},{rx:.55,ry:.42,label:'CONVERGENCE'},{rx:.68,ry:.52,label:'HQ'}];
+const jMissionSites=[{rx:.25,ry:.6,label:'SITE ALPHA'},{rx:.5,ry:.3,label:'SITE BRAVO'},{rx:.7,ry:.38,label:'SITE CHARLIE'}];
+
+function initJourney(){
+  if(journeyInitialized)return;journeyInitialized=true;
+
+  function sizeJourneyCanvas(){
+    const mapCanvas=document.getElementById('mapCanvas');
+    const area=document.querySelector('#page3 .j-map-area');
+    if(!area)return;
+    const w=area.clientWidth,h=area.clientHeight;
+    if(w>0&&h>0){mapCanvas.width=w;mapCanvas.height=h}
+  }
+  sizeJourneyCanvas();
+  setTimeout(sizeJourneyCanvas,100);
+  setTimeout(sizeJourneyCanvas,300);
+  window.addEventListener('resize',sizeJourneyCanvas);
+
+  startJourneyCanvas();jGoToPhase(1);
+
+  setInterval(()=>{
+    ['.j-top-bar','.j-bottom-bar'].forEach(sel=>{const el=document.querySelector('#page3 '+sel);if(el&&Math.random()<.5){el.classList.add('ui-glitching');setTimeout(()=>el.classList.remove('ui-glitching'),350)}});
+  },5000);
+}
+
+function jGoToPhase(num){
+  if(num<1||num>jTotalPhases)return;jCurrentPhase=num;jRevealed.add(num);
+  for(let i=1;i<=jTotalPhases;i++)document.getElementById('phase'+i).classList.remove('active');
+  document.getElementById('phase'+num).classList.add('active');
+  // Position card
+  const pt=jPhasePoints[num-1];const w=document.getElementById('mapCanvas').width,h=document.getElementById('mapCanvas').height;
+  const overlay=document.getElementById('phase'+num);
+  let cx=pt.rx*w+40,cy=pt.ry*h+48-60;
+  if(cx+340>window.innerWidth)cx=pt.rx*w-360;if(cy<60)cy=60;if(cy+250>h)cy=h-260;
+  overlay.style.left=cx+'px';overlay.style.top=cy+'px';
+
+  document.getElementById('jNavCurrent').textContent=String(num).padStart(2,'0');
+  document.getElementById('jPrevBtn').disabled=num===1;
+  const nextBtn=document.getElementById('jNextBtn');
+  if(num===jTotalPhases){nextBtn.innerHTML='COMPLETE BRIEFING <span class="arrow">→</span>';nextBtn.disabled=false}
+  else{nextBtn.innerHTML='NEXT <span class="arrow">→</span>';nextBtn.disabled=false}
+}
+
+document.getElementById('jNextBtn').addEventListener('click',()=>{if(jCurrentPhase===jTotalPhases)document.getElementById('ctaOverlay').classList.add('visible');else jGoToPhase(jCurrentPhase+1)});
+document.getElementById('jPrevBtn').addEventListener('click',()=>jGoToPhase(jCurrentPhase-1));
+document.getElementById('jBackBtn').addEventListener('click',()=>glitchTransition('page3','page2'));
+document.getElementById('ctaOverlay').addEventListener('click',(e)=>{if(e.target===document.getElementById('ctaOverlay'))document.getElementById('ctaOverlay').classList.remove('visible')});
+
+function startJourneyCanvas(){
+  const canvas=document.getElementById('mapCanvas'),ctx=canvas.getContext('2d');let fr=0;
+  const hSt=[],vSt=[],dSt=[];for(let y=.08;y<.92;y+=.045)hSt.push(y);for(let x=.05;x<.95;x+=.04)vSt.push(x);for(let i=0;i<12;i++)dSt.push({x1:.1+Math.random()*.8,y1:.1+Math.random()*.8,x2:.1+Math.random()*.8,y2:.1+Math.random()*.8});
+  const areas=[{name:'SHOREDITCH',rx:.42,ry:.32},{name:'CITY',rx:.38,ry:.42},{name:'CANARY WHARF',rx:.7,ry:.48},{name:'SOUTHBANK',rx:.35,ry:.52},{name:'WESTMINSTER',rx:.22,ry:.48},{name:'CAMDEN',rx:.28,ry:.22},{name:'HACKNEY',rx:.5,ry:.22},{name:'TOWER HAMLETS',rx:.55,ry:.38},{name:'LAMBETH',rx:.3,ry:.62},{name:'GREENWICH',rx:.72,ry:.58}];
+
+  function draw(){
+    const w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);fr++;
+    ctx.lineWidth=.3;hSt.forEach(y=>{ctx.beginPath();ctx.moveTo(w*.03,y*h);ctx.lineTo(w*.97,y*h);ctx.strokeStyle='rgba(0,255,136,0.04)';ctx.stroke()});
+    vSt.forEach(x=>{ctx.beginPath();ctx.moveTo(x*w,h*.03);ctx.lineTo(x*w,h*.97);ctx.strokeStyle='rgba(0,255,136,0.04)';ctx.stroke()});
+    dSt.forEach(s=>{ctx.beginPath();ctx.moveTo(s.x1*w,s.y1*h);ctx.lineTo(s.x2*w,s.y2*h);ctx.strokeStyle='rgba(0,255,136,0.025)';ctx.lineWidth=.4;ctx.stroke()});
+    // Thames
+    ctx.beginPath();ctx.moveTo(w*-.02,h*.5);ctx.bezierCurveTo(w*.12,h*.46,w*.2,h*.53,w*.3,h*.48);ctx.bezierCurveTo(w*.38,h*.44,w*.42,h*.5,w*.5,h*.48);ctx.bezierCurveTo(w*.58,h*.46,w*.62,h*.53,w*.68,h*.48);ctx.bezierCurveTo(w*.78,h*.42,w*.85,h*.48,w*1.02,h*.46);ctx.strokeStyle='rgba(0,200,255,0.12)';ctx.lineWidth=4;ctx.stroke();ctx.strokeStyle='rgba(0,200,255,0.03)';ctx.lineWidth=14;ctx.stroke();
+    ctx.font='7px JetBrains Mono';ctx.fillStyle='rgba(0,200,255,0.07)';ctx.save();ctx.translate(w*.5,h*.46);ctx.rotate(-.01);ctx.fillText('RIVER THAMES',0,0);ctx.restore();
+    areas.forEach(a=>{ctx.font='5px JetBrains Mono';ctx.fillStyle='rgba(0,255,136,0.05)';ctx.fillText(a.name,a.rx*w,a.ry*h)});
+    // London box
+    const bx=20,by=h-70,bw=140,bh=52;ctx.strokeStyle='rgba(0,255,136,0.12)';ctx.lineWidth=1;ctx.strokeRect(bx,by,bw,bh);ctx.fillStyle='rgba(10,10,10,0.7)';ctx.fillRect(bx,by,bw,bh);ctx.font='bold 14px JetBrains Mono';ctx.fillStyle='rgba(0,255,136,0.5)';ctx.fillText('LONDON',bx+12,by+22);ctx.font='7px JetBrains Mono';ctx.fillStyle='rgba(0,255,136,0.25)';ctx.fillText('51.5074° N, 0.1278° W',bx+12,by+36);const lp=Math.sin(fr*.05)*.3+.7;ctx.beginPath();ctx.arc(bx+bw-14,by+14,3*lp,0,Math.PI*2);ctx.fillStyle=`rgba(0,255,136,${.5*lp})`;ctx.fill();
+
+    // Route lines
+    const rev=Array.from(jRevealed).sort();
+    for(let i=0;i<rev.length-1;i++){const a=jPhasePoints[rev[i]-1],b=jPhasePoints[rev[i+1]-1];if(a&&b){ctx.beginPath();ctx.moveTo(a.rx*w,a.ry*h);ctx.lineTo(b.rx*w,b.ry*h);ctx.strokeStyle='rgba(0,255,136,0.15)';ctx.setLineDash([8,6]);ctx.lineDashOffset=-fr*.5;ctx.lineWidth=1;ctx.stroke();ctx.setLineDash([]);const t=((fr*1.5)%200)/200;ctx.beginPath();ctx.arc(a.rx*w+(b.rx*w-a.rx*w)*t,a.ry*h+(b.ry*h-a.ry*h)*t,2,0,Math.PI*2);ctx.fillStyle='rgba(0,255,136,0.6)';ctx.fill()}}
+
+    // Phase markers
+    rev.forEach(pn=>{const isAct=pn===jCurrentPhase,pt=jPhasePoints[pn-1];if(!pt)return;const x=pt.rx*w,y=pt.ry*h,pulse=Math.sin(fr*.06+pn)*.3+.7;
+      if(pn===4){jMissionSites.forEach((ms,mi)=>{const mx=ms.rx*w,my=ms.ry*h,mp=Math.sin(fr*.06+mi*2)*.3+.7;
+        if(isAct){const ring=(fr*.5+mi*25)%40;ctx.beginPath();ctx.arc(mx,my,ring,0,Math.PI*2);ctx.strokeStyle=`rgba(0,255,136,${.15*(1-ring/40)})`;ctx.lineWidth=1;ctx.stroke()}
+        ctx.beginPath();ctx.arc(mx,my,isAct?5*mp:3,0,Math.PI*2);ctx.fillStyle=`rgba(0,255,136,${isAct?.7*mp:.3})`;ctx.fill();
+        ctx.font='7px JetBrains Mono';ctx.fillStyle=`rgba(0,255,136,${isAct?.35:.12})`;ctx.fillText(ms.label,mx+10,my-8);ctx.font='6px JetBrains Mono';ctx.fillStyle=`rgba(255,51,68,${isAct?.3:.1})`;ctx.fillText('[CLASSIFIED]',mx+10,my+2)})}
+      else{if(isAct){const ring=(fr*.5)%50;ctx.beginPath();ctx.arc(x,y,ring,0,Math.PI*2);ctx.strokeStyle=`rgba(0,255,136,${.18*(1-ring/50)})`;ctx.lineWidth=1.2;ctx.stroke();ctx.beginPath();ctx.arc(x,y,20,0,Math.PI*2);ctx.fillStyle=`rgba(0,255,136,${.05*pulse})`;ctx.fill()}
+        ctx.beginPath();ctx.arc(x,y,isAct?6*pulse:3.5,0,Math.PI*2);ctx.fillStyle=`rgba(0,255,136,${isAct?.8*pulse:.35})`;ctx.fill();ctx.beginPath();ctx.arc(x,y,2,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,255,${isAct?.9:.3})`;ctx.fill();
+        ctx.font=isAct?'bold 8px JetBrains Mono':'7px JetBrains Mono';ctx.fillStyle=`rgba(0,255,136,${isAct?.45:.15})`;ctx.fillText(pt.label,x+12,y-10);ctx.font='6px JetBrains Mono';ctx.fillStyle=`rgba(255,51,68,${isAct?.35:.1})`;ctx.fillText('[CLASSIFIED]',x+12,y+1);
+        if(isAct){const ch=14;ctx.strokeStyle=`rgba(0,255,136,${.25*pulse})`;ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(x-ch,y);ctx.lineTo(x-7,y);ctx.stroke();ctx.beginPath();ctx.moveTo(x+7,y);ctx.lineTo(x+ch,y);ctx.stroke();ctx.beginPath();ctx.moveTo(x,y-ch);ctx.lineTo(x,y-7);ctx.stroke();ctx.beginPath();ctx.moveTo(x,y+7);ctx.lineTo(x,y+ch);ctx.stroke()}}});
+    requestAnimationFrame(draw)}
+  draw();
+}
+
+// Keyboard nav (global)
+document.addEventListener('keydown',e=>{
+  const p1=document.getElementById('page1').classList.contains('active');
+  const p2=document.getElementById('page2').classList.contains('active');
+  const p3=document.getElementById('page3').classList.contains('active');
+  if(p2){if(e.key==='ArrowRight')document.getElementById('dNextBtn').click();if(e.key==='ArrowLeft')document.getElementById('dPrevBtn').click()}
+  if(p3){if(e.key==='ArrowRight')document.getElementById('jNextBtn').click();if(e.key==='ArrowLeft')document.getElementById('jPrevBtn').click()}
+});
+</script>
+</body>
+</html>
