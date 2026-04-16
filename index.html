@@ -249,26 +249,127 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:
 .cta-modal .cta-footer{margin-top:24px;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--grey);opacity:.4}
 
 @media(max-width:768px){
-  .stripe-logo{font-size:52px}
-  .stripe-logo.g4::before,.stripe-logo.g4::after,.stripe-logo.g-chaos::before,.stripe-logo.g-chaos::after{font-size:52px}
-  .stripe-revealed{font-size:28px;letter-spacing:6px}
-  .origins-sub{font-size:9px;letter-spacing:8px}
-  .agents-of{font-size:9px;letter-spacing:8px}
-  .standby-msg{font-size:12px;letter-spacing:2px}
-  .win-popup{width:340px}
+  /* ═══ PAGE 1 — ENTRY ═══ */
+  .stripe-logo{font-size:48px}
+  .stripe-logo.g4::before,.stripe-logo.g4::after,.stripe-logo.g-chaos::before,.stripe-logo.g-chaos::after{font-size:48px}
+  .stripe-revealed{font-size:26px;letter-spacing:5px}
+  .origins-sub{font-size:8px;letter-spacing:6px;margin-top:10px;margin-left:6px}
+  .agents-of{font-size:8px;letter-spacing:6px;margin-left:6px}
+  .standby-msg{font-size:11px;letter-spacing:2px;white-space:normal;padding:0 20px;width:90%}
+  .p1-phrase-flicker{font-size:26px;letter-spacing:2px}
+  .p1-classification{top:16px;left:16px;font-size:8px;letter-spacing:2px}
+  .p1-status-bar{flex-direction:column;gap:4px;bottom:16px;left:16px;right:16px;font-size:7px;letter-spacing:1px;align-items:flex-start}
+  .p1-cta a{font-size:9px;letter-spacing:4px;padding:12px 28px}
+  .p1-cta a:hover{letter-spacing:5px}
+  .p1-divider{margin:24px auto}
+  .p1-prompt{font-size:10px;letter-spacing:1.5px}
+  #globeCanvas1{width:500px !important;height:500px !important}
+
+  /* Win97 popup */
+  .win-popup{width:calc(100vw - 32px);max-width:360px}
+  .win-body{padding:14px 16px;gap:12px}
+  .win-text .alert-title{font-size:12px}
+  .win-text .alert-msg{font-size:10px}
+  .win-text .alert-code{font-size:8px;padding:4px 6px}
+  .win-footer{flex-direction:column;gap:8px;padding:10px 16px 14px}
+  .win-btn{min-width:100%;padding:8px 12px;font-size:11px}
+
+  /* ═══ PAGE 2 — DOSSIER ═══ */
   #page2{flex-direction:column}
-  #page2 .left-panel{width:100%;height:auto;max-height:40vh;border-right:none;border-bottom:1px solid rgba(0,255,136,.06)}
-  #page2 .right-panel{width:100%;flex:1}
-  #page2 .file-tabs{flex-direction:row;flex-wrap:wrap;gap:0}
-  #page2 .file-tab{border-left:none;border-bottom:2px solid transparent;padding:8px 10px;font-size:8px}
-  #page2 .file-tab.active{border-bottom-color:var(--green);border-left-color:transparent}
-  #page2 .reading-pane{padding:24px 20px 100px}
+  #page2 .left-panel{width:100%;height:auto;flex:0 0 auto;border-right:none;border-bottom:1px solid rgba(0,255,136,.06)}
+  #page2 .left-header{padding:12px 16px}
+  #page2 .left-header .logo{font-size:8px;letter-spacing:3px;margin-bottom:8px}
+  #page2 .canvas-area{display:none}
   #page2 .left-footer{display:none}
-  .phase-card{max-width:260px;padding:16px}
+  #page2 .file-tabs{flex-direction:row;flex-wrap:wrap;gap:4px}
+  #page2 .file-tab{border-left:none;border-bottom:2px solid transparent;padding:6px 10px;font-size:8px;letter-spacing:1px;gap:6px}
+  #page2 .file-tab.active{border-bottom-color:var(--green);border-left-color:transparent;background:rgba(0,255,136,.04)}
+  #page2 .file-tab.mission-tab{border-top:none;margin-top:0;padding-top:6px;border-left:1px solid rgba(255,51,68,.2);padding-left:10px;margin-left:4px}
+  #page2 .right-panel{width:100%;flex:1;min-height:0}
+  #page2 .right-header{padding:10px 16px;font-size:7px}
+  #page2 .right-header .doc-info,#page2 .right-header .status{font-size:7px;letter-spacing:1.5px}
+  #page2 .reading-pane{padding:20px 20px 90px}
+  #page2 .file-header{margin-bottom:20px;padding-bottom:14px}
+  #page2 .file-header .file-id{font-size:8px;letter-spacing:2px;margin-bottom:6px}
+  #page2 .file-header .file-title{font-size:22px;letter-spacing:.5px}
+  #page2 .file-header .file-class{font-size:7px;letter-spacing:1.5px;margin-top:6px}
+  #page2 .file-body{font-size:12px;line-height:1.75}
+  #page2 .file-body p{margin-bottom:14px}
+  #page2 .file-body .key-line{font-size:13px;margin:20px 0;padding:10px 0}
+  #page2 .nav-bar{padding:12px 16px}
+  .nav-btn{font-size:9px;letter-spacing:2px;padding:8px 14px}
+  .nav-counter{font-size:8px;letter-spacing:2px}
+
+  /* ═══ PAGE 3 — JOURNEY ═══ */
+  #page3 .j-top-bar{padding:0 14px;height:44px}
+  #page3 .j-top-bar .logo{font-size:7px;letter-spacing:2px}
+  #page3 .j-top-bar .back-link{font-size:8px;letter-spacing:1.5px}
+  #page3 .j-top-bar .status{font-size:7px;letter-spacing:1.5px}
+  #page3 .j-bottom-bar{padding:0 14px;height:50px}
+  .phase-overlay{position:fixed !important;left:50% !important;top:auto !important;bottom:80px !important;transform:translateX(-50%);width:calc(100% - 32px);max-width:340px}
+  .phase-card{max-width:100%;padding:16px 18px}
+  .phase-card .phase-num{font-size:7px;letter-spacing:2px}
+  .phase-card .phase-title{font-size:16px}
+  .phase-card .phase-loc{font-size:8px;letter-spacing:1.5px;margin-bottom:10px}
+  .phase-card .phase-desc{font-size:11px;line-height:1.6}
+
+  /* ═══ CTA MODAL ═══ */
+  .cta-modal{padding:32px 24px;max-width:calc(100vw - 32px);margin:16px}
+  .cta-modal .cta-icon{font-size:22px;margin-bottom:14px}
+  .cta-modal .cta-title{font-size:17px;margin-bottom:12px}
+  .cta-modal .cta-body{font-size:11px;margin-bottom:24px;line-height:1.7}
+  .cta-modal .cta-body .num{font-size:13px}
+  .cta-modal .cta-btn{font-size:9px;letter-spacing:3px;padding:12px 22px}
+  .cta-modal .cta-btn:hover{letter-spacing:4px}
+  .cta-modal .cta-footer{margin-top:18px;font-size:7px;letter-spacing:2px}
 }
+
+@media(max-width:400px){
+  .stripe-logo{font-size:38px}
+  .stripe-logo.g4::before,.stripe-logo.g4::after,.stripe-logo.g-chaos::before,.stripe-logo.g-chaos::after{font-size:38px}
+  .stripe-revealed{font-size:22px;letter-spacing:4px}
+  .origins-sub{font-size:7px;letter-spacing:4px}
+  .agents-of{font-size:7px;letter-spacing:4px}
+  .win-popup{max-width:calc(100vw - 24px)}
+  #page2 .file-tab{font-size:7px;padding:5px 8px}
+}
+/* ═══ DESKTOP WARNING OVERLAY ═══ */
+.desktop-warning{
+  position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;
+  background:var(--black);
+  display:none !important;
+  align-items:center;justify-content:center;
+  padding:32px;
+  animation:fadeIn .5s ease;
+}
+.desktop-warning.visible{display:flex !important}
+.desktop-warning::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,136,.02) 2px,rgba(0,255,136,.02) 4px);pointer-events:none}
+.desktop-warning-content{max-width:360px;text-align:center;position:relative;z-index:2}
+.desktop-warning .warning-icon{font-size:48px;margin-bottom:24px;animation:pulse-icon 2s ease infinite}
+.desktop-warning .warning-title{font-family:'Outfit',sans-serif;font-size:22px;font-weight:600;color:var(--green);margin-bottom:16px;letter-spacing:1px;text-shadow:0 0 30px rgba(0,255,136,.2);line-height:1.4}
+.desktop-warning .warning-body{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:300;color:var(--white);opacity:.75;line-height:1.8;margin-bottom:24px}
+.desktop-warning .warning-classification{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--red);opacity:.6;margin-bottom:12px}
+.desktop-warning .warning-footer{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--grey);opacity:.5;margin-top:16px}
+.desktop-warning .continue-btn{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:400;letter-spacing:3px;text-transform:uppercase;color:var(--grey);background:transparent;border:1px solid rgba(136,136,136,.2);padding:8px 20px;cursor:pointer;transition:all .3s ease;margin-top:8px}
+.desktop-warning .continue-btn:hover{color:var(--green-dim);border-color:rgba(0,255,136,.2)}
+
 </style>
 </head>
 <body>
+
+<!-- ═══════════════════════════════════ -->
+<!-- DESKTOP-ONLY WARNING                -->
+<!-- ═══════════════════════════════════ -->
+<div class="desktop-warning" id="desktopWarning">
+  <div class="desktop-warning-content">
+    <div class="warning-classification">⚠ Classified // Desktop Access Required</div>
+    <div class="warning-icon">🖥</div>
+    <div class="warning-title">This briefing is best viewed on desktop.</div>
+    <div class="warning-body">The Origins Protocol contains classified visual intel optimised for larger displays. For full clearance, return on a desktop device.</div>
+    <button class="continue-btn" id="continueMobile">Continue anyway</button>
+    <div class="warning-footer">S.T.R.I.P.E. // Operator Eyes Only</div>
+  </div>
+</div>
 
 <!-- ═══════════════════════════════════ -->
 <!-- GLITCH TRANSITION OVERLAY          -->
@@ -387,6 +488,30 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:
 </div>
 
 <script>
+// ═══════════════════════════════════
+// MOBILE DETECTION
+// ═══════════════════════════════════
+(function(){
+  // Only trigger on actual mobile devices (touch + user agent), not narrow desktop windows
+  const isTouch=('ontouchstart' in window)||navigator.maxTouchPoints>0;
+  const isMobileUA=/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const isSmallScreen=window.innerWidth<=768;
+  const isMobile=isMobileUA||(isTouch&&isSmallScreen);
+
+  if(isMobile){
+    const warning=document.getElementById('desktopWarning');
+    if(warning){
+      warning.classList.add('visible');
+      const btn=document.getElementById('continueMobile');
+      if(btn){
+        btn.addEventListener('click',()=>{
+          warning.classList.remove('visible');
+        });
+      }
+    }
+  }
+})();
+
 // ═══════════════════════════════════
 // PAGE TRANSITION SYSTEM
 // ═══════════════════════════════════
